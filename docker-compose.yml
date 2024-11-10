@@ -1,0 +1,7 @@
+services:
+  browser-dev:
+    build: .
+    volumes:
+      - .:/app
+    tty: true
+    stdin_open: true

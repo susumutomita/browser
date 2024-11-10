@@ -19,3 +19,23 @@ Cargo.lock
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+refs/
+.idea/
+.DS_Store
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Docker
+.docker/
+
+# 参考実装の中で生成される一時ファイル等
+refs/**/target/
+refs/**/*.rs.bk
+refs/**/Cargo.lock

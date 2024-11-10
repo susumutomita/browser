@@ -1,0 +1,79 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+    silent: true
+
+  up:
+    desc: 開発環境を起動
+    cmds:
+      - docker compose up -d
+      - echo "開発環境を起動しました"
+
+  down:
+    desc: 開発環境を停止
+    cmds:
+      - dockercompose down
+      - echo "開発環境を停止しました"
+
+  rebuild:
+    desc: 開発環境を再構築
+    cmds:
+      - docker compose down
+      - docker compose build --no-cache
+      - docker compose up -d
+      - echo "開発環境を再構築しました"
+
+  shell:
+    desc: 開発環境のシェルに接続
+    cmds:
+      - docker compose exec browser-dev bash
+
+  logs:
+    desc: コンテナのログを表示
+    cmds:
+      - docker compose logs -f
+
+  init:
+    desc: リポジトリの初期化とサブモジュールのセットアップ
+    cmds:
+      - git submodule add https://github.com/d0iasm/saba.git refs/saba
+      - git submodule add https://github.com/d0iasm/sababook.git refs/sababook
+      - git submodule update --init --recursive
+      - echo "参考実装のセットアップが完了しました"
+
+  update-refs:
+    desc: 参考実装を最新版に更新
+    cmds:
+      - git submodule update --remote
+      - echo "参考実装を更新しました"
+
+  lint:
+    desc: 全てのlintチェックを実行
+    cmds:
+      - task lint:yaml
+      - task lint:rust
+
+  lint:yaml:
+    desc: YAMLファイルのlintチェック
+    cmds:
+      - docker run --rm -v {{.PWD}}:/work giantswarm/yamllint .
+
+  lint:rust:
+    desc: Rustのコードチェック
+    cmds:
+      - docker-compose exec -T browser-dev cargo fmt -- --check
+      - docker-compose exec -T browser-dev cargo clippy -- -D warnings
+
+  test:
+    desc: テストを実行
+    cmds:
+      - docker-compose exec -T browser-dev cargo test
+
+  ci:
+    desc: CI用のチェックを全て実行
+    cmds:
+      - task lint
+      - task test
