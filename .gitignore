@@ -37,3 +37,4 @@ Thumbs.db
 refs/**/target/
 refs/**/*.rs.bk
 refs/**/Cargo.lock
+build
