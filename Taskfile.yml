@@ -15,7 +15,7 @@ tasks:
   down:
     desc: 開発環境を停止
     cmds:
-      - dockercompose down
+      - docker compose down
       - echo "開発環境を停止しました"
 
   rebuild:
