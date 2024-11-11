@@ -33,11 +33,9 @@ jobs:
           submodules: true
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: nightly-2024-01-01
-          override: true
           components: rustfmt, clippy
 
       - name: Check formatting
