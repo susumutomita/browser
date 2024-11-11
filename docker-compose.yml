@@ -1,6 +1,17 @@
 services:
   browser-dev:
     build: .
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rustc", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - RUST_BACKTRACE=1
+      - CARGO_HOME=/app/.cargo
+    mem_limit: 2g
+    mem_reservation: 1g
     volumes:
       - .:/app
     tty: true
