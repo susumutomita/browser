@@ -1,0 +1,6 @@
+[submodule "refs/saba"]
+	path = refs/saba
+	url = https://github.com/d0iasm/saba.git
+[submodule "refs/sababook"]
+	path = refs/sababook
+	url = https://github.com/d0iasm/sababook.git

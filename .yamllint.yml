@@ -1,0 +1,13 @@
+---
+extends: default
+
+# document-startルールを無効化
+rules:
+  document-start: disable
+  truthy:
+    # trueとfalse以外の真偽値も許可
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+
+ignore: |
+  /refs/
+  /refs/saba/
