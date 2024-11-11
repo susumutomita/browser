@@ -65,13 +65,13 @@ tasks:
   lint:rust:
     desc: Rustのコードチェック
     cmds:
-      - docker-compose exec -T browser-dev cargo fmt -- --check
-      - docker-compose exec -T browser-dev cargo clippy -- -D warnings
+      - docker compose exec -T browser-dev cargo fmt -- --check
+      - docker compose exec -T browser-dev cargo clippy -- -D warnings
 
   test:
     desc: テストを実行
     cmds:
-      - docker-compose exec -T browser-dev cargo test
+      - docker compose exec -T browser-dev cargo test
 
   ci:
     desc: CI用のチェックを全て実行
