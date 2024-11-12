@@ -38,3 +38,4 @@ refs/**/target/
 refs/**/*.rs.bk
 refs/**/Cargo.lock
 build
+.cargo
