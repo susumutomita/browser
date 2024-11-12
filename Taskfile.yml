@@ -37,33 +37,8 @@ tasks:
     cmds:
       - docker compose logs -f
 
-  init:
-    desc: Initialize repository and setup development environment
-    cmds:
-      - git submodule add https://github.com/d0iasm/saba.git refs/saba
-      - git submodule add https://github.com/d0iasm/sababook.git refs/sababook
-      - git submodule update --init --recursive
-      - task: setup:rust
-      - echo "Repository initialization completed"
-
-  setup:rust:
-    desc: Setup Rust development tools
-    cmds:
-      - docker compose up -d
-      - docker compose exec -T browser-dev cargo install cargo-watch
-      - mkdir -p src
-      - |
-        cat > src/main.rs << 'EOF'
-        fn main() {
-            println!("Hello, browser!");
-        }
-        EOF
-      - docker compose exec -T browser-dev cargo init --bin
-      - echo "Rust development environment setup completed"
-
   dev:
     desc: Start development environment and watch for changes
-    deps: [setup:rust]
     cmds:
       - task: up
       - task: run:watch
