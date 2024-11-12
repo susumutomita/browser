@@ -8,73 +8,106 @@ tasks:
     silent: true
 
   up:
-    desc: 開発環境を起動
+    desc: Start development environment
     cmds:
       - docker compose up -d
-      - echo "開発環境を起動しました"
+      - echo "Development environment started"
 
   down:
-    desc: 開発環境を停止
+    desc: Stop development environment
     cmds:
       - docker compose down
-      - echo "開発環境を停止しました"
+      - echo "Development environment stopped"
 
   rebuild:
-    desc: 開発環境を再構築
+    desc: Rebuild development environment
     cmds:
       - docker compose down
       - docker compose build --no-cache
       - docker compose up -d
-      - echo "開発環境を再構築しました"
+      - echo "Development environment rebuilt"
 
   shell:
-    desc: 開発環境のシェルに接続
+    desc: Connect to development shell
     cmds:
       - docker compose exec browser-dev bash
 
   logs:
-    desc: コンテナのログを表示
+    desc: Display container logs
     cmds:
       - docker compose logs -f
 
   init:
-    desc: リポジトリの初期化とサブモジュールのセットアップ
+    desc: Initialize repository and setup development environment
     cmds:
       - git submodule add https://github.com/d0iasm/saba.git refs/saba
       - git submodule add https://github.com/d0iasm/sababook.git refs/sababook
       - git submodule update --init --recursive
-      - echo "参考実装のセットアップが完了しました"
+      - task: setup:rust
+      - echo "Repository initialization completed"
+
+  setup:rust:
+    desc: Setup Rust development tools
+    cmds:
+      - docker compose up -d
+      - docker compose exec -T browser-dev cargo install cargo-watch
+      - mkdir -p src
+      - |
+        cat > src/main.rs << 'EOF'
+        fn main() {
+            println!("Hello, browser!");
+        }
+        EOF
+      - docker compose exec -T browser-dev cargo init --bin
+      - echo "Rust development environment setup completed"
+
+  dev:
+    desc: Start development environment and watch for changes
+    deps: [setup:rust]
+    cmds:
+      - task: up
+      - task: run:watch
 
   update-refs:
-    desc: 参考実装を最新版に更新
+    desc: Update reference implementations to latest version
     cmds:
       - git submodule update --remote
-      - echo "参考実装を更新しました"
+      - echo "Reference implementations updated"
 
   lint:
-    desc: 全てのlintチェックを実行
+    desc: Run all lint checks
     cmds:
       - task lint:yaml
       - task lint:rust
 
   lint:yaml:
-    desc: YAMLファイルのlintチェック
+    desc: Run YAML lint checks
     cmds:
       - docker run --rm -v {{.PWD}}:/work giantswarm/yamllint .
 
   lint:rust:
-    desc: Rustのコードチェック
+    desc: Run Rust code checks
     cmds:
       - docker compose exec -T browser-dev cargo fmt -- --check
       - docker compose exec -T browser-dev cargo clippy -- -D warnings
 
   test:
-    desc: テストを実行
+    desc: Run tests
     cmds:
       - docker compose exec -T browser-dev cargo test
 
   ci:
-    desc: CI用のチェックを全て実行
+    desc: Run all CI checks
     cmds:
       - task lint
       - task test
+
+  run:
+    desc: Run the application
+    cmds:
+      - docker compose exec -T browser-dev cargo run
+
+  run:watch:
+    desc: Run the application in watch mode
+    cmds:
+      - docker compose exec -T browser-dev cargo watch -x run

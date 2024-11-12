@@ -1,103 +1,103 @@
-# ［作って学ぶ］ブラウザのしくみ 実装リポジトリ
+# Browser Implementation Project - "Learn by Building"
 
-このリポジトリは「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」の学習および実装用リポジトリです。
+This repository is for learning and implementing concepts from the book "Understanding Browser Internals by Building One: HTTP, HTML, CSS, and JavaScript Under the Hood".
 
-## 参考書籍
+## Reference Book
 
 https://direct.gihyo.jp/view/item/000000003560
 
-## 参考実装
+## Reference Implementations
 
-本プロジェクトには以下の参考実装がサブモジュールとして含まれています：
+This project includes the following reference implementations as submodules:
 
-- [SaBA](https://github.com/d0iasm/saba) - 最新の変更/修正を含む実装
-- [SaBAbook](https://github.com/d0iasm/sababook) - 書籍と同じコード（章ごとにディレクトリ分け）
+- [SaBA](https://github.com/d0iasm/saba) - Implementation with latest changes/fixes
+- [SaBAbook](https://github.com/d0iasm/sababook) - Book-aligned code (organized by chapters)
 
-### 参考実装のセットアップ
+### Setting Up Reference Implementations
 
-1. サブモジュールを初期化してクローン:
+1. Initialize and clone submodules:
 ```bash
 git submodule init
 git submodule update
 ```
 
-2. 各実装のビルドと実行については、それぞれのリポジトリのREADMEを参照してください。
+2. For building and running each implementation, please refer to their respective repository READMEs.
 
-## 開発環境のセットアップ
+## Development Environment Setup
 
-### 必要なツール
+### Required Tools
 
 - Docker
 - Docker Compose
-- Task (タスクランナー)
+- Task (Task runner)
 
-### Dockerのインストール
+### Installing Docker
 
 #### MacOS
-1. [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)をダウンロードしてインストール
-2. インストール後、Docker Desktopを起動
+1. Download and install [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+2. Launch Docker Desktop after installation
 
 #### Windows
-1. [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)をダウンロードしてインストール
-2. WSL2のセットアップが必要な場合は、指示に従って設定
-3. インストール後、Docker Desktopを起動
+1. Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+2. Set up WSL2 if required, following the instructions
+3. Launch Docker Desktop after installation
 
 #### Linux
 ```bash
-# Ubuntuの場合
+# For Ubuntu
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 ```
 
-### Taskのインストール
+### Installing Task
 
 #### MacOS
 ```bash
-# Homebrewを使用
+# Using Homebrew
 brew install go-task/tap/go-task
 
-# または
+# Or
 brew install task
 ```
 
 #### Linux
 ```bash
-# スクリプトを使用してインストール
+# Using installation script
 sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
 
-# または、snapを使用
+# Or using snap
 sudo snap install task --classic
 ```
 
 #### Windows
 ```powershell
-# Chocolateyを使用
+# Using Chocolatey
 choco install go-task
 
-# または、Scoopを使用
+# Or using Scoop
 scoop install task
 ```
 
-### プロジェクトの起動
+### Starting the Project
 
-1. リポジトリをクローン:
+1. Clone the repository:
 ```bash
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
 ```
 
-2. 開発環境を起動:
+2. Launch development environment:
 ```bash
 task dev
 ```
 
-## トラブルシューティング
+## Troubleshooting
 
-問題が発生した場合は、以下を確認してください：
+If you encounter any issues, please check the following:
 
-1. Docker Desktopが正常に起動しているか
-2. 必要なポートが使用可能か
-3. サブモジュールが正しくクローンされているか
+1. Verify that Docker Desktop is running properly
+2. Ensure required ports are available
+3. Confirm submodules are correctly cloned
 
-詳細なエラーについては、Issueを作成してください。
+For detailed error reports, please create an Issue.
