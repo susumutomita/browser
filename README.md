@@ -1,10 +1,24 @@
 # Browser Implementation Project - "Learn by Building"
 
-This repository is for learning and implementing concepts from the book "Understanding Browser Internals by Building One: HTTP, HTML, CSS, and JavaScript Under the Hood".
+This repository is for learning and implementing concepts from the book 「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」.
 
 ## Reference Book
 
-https://direct.gihyo.jp/view/item/000000003560
+[「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」](https://direct.gihyo.jp/view/item/000000003560)
+
+## Project Structure
+
+```tree
+.
+├── .github/         # GitHub Actions workflows
+├── refs/           # Reference implementations
+│   ├── saba/       # SaBA implementation
+│   └── sababook/   # Book examples
+├── src/            # Our browser implementation
+├── Dockerfile      # Development environment
+├── docker-compose.yml
+└── Taskfile.yml    # Development tasks
+```
 
 ## Reference Implementations
 
@@ -15,89 +29,108 @@ This project includes the following reference implementations as submodules:
 
 ### Setting Up Reference Implementations
 
-1. Initialize and clone submodules:
 ```bash
+# Initialize and update submodules
 git submodule init
 git submodule update
 ```
 
-2. For building and running each implementation, please refer to their respective repository READMEs.
+## Development Environment
 
-## Development Environment Setup
-
-### Required Tools
+### Prerequisites
 
 - Docker
 - Docker Compose
 - Task (Task runner)
 
-### Installing Docker
-
-#### MacOS
-1. Download and install [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
-2. Launch Docker Desktop after installation
-
-#### Windows
-1. Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
-2. Set up WSL2 if required, following the instructions
-3. Launch Docker Desktop after installation
-
-#### Linux
-```bash
-# For Ubuntu
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-```
-
-### Installing Task
-
-#### MacOS
-```bash
-# Using Homebrew
-brew install go-task/tap/go-task
-
-# Or
-brew install task
-```
-
-#### Linux
-```bash
-# Using installation script
-sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
-
-# Or using snap
-sudo snap install task --classic
-```
-
-#### Windows
-```powershell
-# Using Chocolatey
-choco install go-task
-
-# Or using Scoop
-scoop install task
-```
-
-### Starting the Project
+### Quick Start
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
 ```
 
-2. Launch development environment:
+2. Start development environment:
+
+```bash
+task up
+```
+
+### Available Tasks
+
+- `task up` - Start development environment
+- `task down` - Stop development environment
+- `task rebuild` - Rebuild development environment
+- `task dev` - Start development with hot-reload
+- `task run` - Run the application
+- `task run:watch` - Run with file watching
+- `task shell` - Access development shell
+- `task logs` - View container logs
+- `task lint` - Run all linters
+- `task test` - Run tests
+- `task ci` - Run all CI checks
+
+### Development Workflow
+
+1. Start the development environment:
+
+```bash
+task up
+```
+
+2. Run the application:
+
+```bash
+task run
+```
+
+3. For development with hot-reload:
+
 ```bash
 task dev
 ```
 
+## CI/CD
+
+This project uses GitHub Actions for:
+
+- Code formatting checks
+- Linting
+- Testing
+- Security scanning with Trivy
+
 ## Troubleshooting
 
-If you encounter any issues, please check the following:
+If you encounter any issues:
 
-1. Verify that Docker Desktop is running properly
-2. Ensure required ports are available
-3. Confirm submodules are correctly cloned
+1. Verify Docker is running:
 
-For detailed error reports, please create an Issue.
+```bash
+docker info
+```
+
+2. Rebuild the development environment:
+
+```bash
+task rebuild
+```
+
+3. Check logs:
+
+```bash
+task logs
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
