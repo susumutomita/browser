@@ -1,103 +1,136 @@
-# ［作って学ぶ］ブラウザのしくみ 実装リポジトリ
+# Browser Implementation Project - "Learn by Building"
 
-このリポジトリは「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」の学習および実装用リポジトリです。
+This repository is for learning and implementing concepts from the book 「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」.
 
-## 参考書籍
+## Reference Book
 
-https://direct.gihyo.jp/view/item/000000003560
+[「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」](https://direct.gihyo.jp/view/item/000000003560)
 
-## 参考実装
+## Project Structure
 
-本プロジェクトには以下の参考実装がサブモジュールとして含まれています：
+```tree
+.
+├── .github/         # GitHub Actions workflows
+├── refs/           # Reference implementations
+│   ├── saba/       # SaBA implementation
+│   └── sababook/   # Book examples
+├── src/            # Our browser implementation
+├── Dockerfile      # Development environment
+├── docker-compose.yml
+└── Taskfile.yml    # Development tasks
+```
 
-- [SaBA](https://github.com/d0iasm/saba) - 最新の変更/修正を含む実装
-- [SaBAbook](https://github.com/d0iasm/sababook) - 書籍と同じコード（章ごとにディレクトリ分け）
+## Reference Implementations
 
-### 参考実装のセットアップ
+This project includes the following reference implementations as submodules:
 
-1. サブモジュールを初期化してクローン:
+- [SaBA](https://github.com/d0iasm/saba) - Implementation with latest changes/fixes
+- [SaBAbook](https://github.com/d0iasm/sababook) - Book-aligned code (organized by chapters)
+
+### Setting Up Reference Implementations
+
 ```bash
+# Initialize and update submodules
 git submodule init
 git submodule update
 ```
 
-2. 各実装のビルドと実行については、それぞれのリポジトリのREADMEを参照してください。
+## Development Environment
 
-## 開発環境のセットアップ
-
-### 必要なツール
+### Prerequisites
 
 - Docker
 - Docker Compose
-- Task (タスクランナー)
+- Task (Task runner)
 
-### Dockerのインストール
+### Quick Start
 
-#### MacOS
-1. [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)をダウンロードしてインストール
-2. インストール後、Docker Desktopを起動
+1. Clone the repository:
 
-#### Windows
-1. [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)をダウンロードしてインストール
-2. WSL2のセットアップが必要な場合は、指示に従って設定
-3. インストール後、Docker Desktopを起動
-
-#### Linux
-```bash
-# Ubuntuの場合
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-```
-
-### Taskのインストール
-
-#### MacOS
-```bash
-# Homebrewを使用
-brew install go-task/tap/go-task
-
-# または
-brew install task
-```
-
-#### Linux
-```bash
-# スクリプトを使用してインストール
-sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
-
-# または、snapを使用
-sudo snap install task --classic
-```
-
-#### Windows
-```powershell
-# Chocolateyを使用
-choco install go-task
-
-# または、Scoopを使用
-scoop install task
-```
-
-### プロジェクトの起動
-
-1. リポジトリをクローン:
 ```bash
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
 ```
 
-2. 開発環境を起動:
+2. Start development environment:
+
+```bash
+task up
+```
+
+### Available Tasks
+
+- `task up` - Start development environment
+- `task down` - Stop development environment
+- `task rebuild` - Rebuild development environment
+- `task dev` - Start development with hot-reload
+- `task run` - Run the application
+- `task run:watch` - Run with file watching
+- `task shell` - Access development shell
+- `task logs` - View container logs
+- `task lint` - Run all linters
+- `task test` - Run tests
+- `task ci` - Run all CI checks
+
+### Development Workflow
+
+1. Start the development environment:
+
+```bash
+task up
+```
+
+2. Run the application:
+
+```bash
+task run
+```
+
+3. For development with hot-reload:
+
 ```bash
 task dev
 ```
 
-## トラブルシューティング
+## CI/CD
 
-問題が発生した場合は、以下を確認してください：
+This project uses GitHub Actions for:
 
-1. Docker Desktopが正常に起動しているか
-2. 必要なポートが使用可能か
-3. サブモジュールが正しくクローンされているか
+- Code formatting checks
+- Linting
+- Testing
+- Security scanning with Trivy
 
-詳細なエラーについては、Issueを作成してください。
+## Troubleshooting
+
+If you encounter any issues:
+
+1. Verify Docker is running:
+
+```bash
+docker info
+```
+
+2. Rebuild the development environment:
+
+```bash
+task rebuild
+```
+
+3. Check logs:
+
+```bash
+task logs
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
