@@ -1,5 +1,21 @@
-#![no_std]
+use alloc::string::String;
 
-extern crate alloc;
+#[derive(Debug,Clone,PartialEq)]
+pub struct Url{
+  url: String,
+  host:String,
+  port:String,
+  searchpart:String,
+}
 
-pub mod url;
+impl Url {
+  pub fn new(url: String) -> Self{
+    Self{
+      url,
+      host:"".to_string(),
+      port:"".to_string(),
+      path:"".to_string().
+      searchpart:"".to_string(),
+    }
+  }
+}
