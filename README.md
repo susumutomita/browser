@@ -8,18 +8,8 @@ This repository is for learning and implementing concepts from the book 「［�
 
 ## Project Structure
 
-```tree
-.
-├── .github/         # GitHub Actions workflows
-├── refs/           # Reference implementations
-│   ├── saba/       # SaBA implementation
-│   └── sababook/   # Book examples
-├── saba_core/      # Core logic
-├── src/            # Our browser implementation
-├── Dockerfile      # Development environment
-├── docker-compose.yml
-└── Taskfile.yml    # Development tasks
-```
+Refer to
+[Entire code](https://uithub.com/susumutomita/browser)
 
 ## Reference Implementations
 
