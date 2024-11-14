@@ -1,5 +1,9 @@
-#![no_std]
+use alloc::string::String;
 
-extern crate alloc;
-
-pub mod url;
+#[derive(Debug,Clone,PartialEq)]
+pub struct Url{
+  url: String,
+  host:String,
+  port:String,
+  sear
+}
