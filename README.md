@@ -14,6 +14,7 @@ This repository is for learning and implementing concepts from the book 「［�
 ├── refs/           # Reference implementations
 │   ├── saba/       # SaBA implementation
 │   └── sababook/   # Book examples
+├── saba_core/      # Core logic
 ├── src/            # Our browser implementation
 ├── Dockerfile      # Development environment
 ├── docker-compose.yml
