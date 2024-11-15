@@ -5,10 +5,23 @@ pub struct Url {
     url: String,
     host: String,
     port: String,
+    path: String,
     searchpart: String,
 }
 
 impl Url {
+    /// Creates a new URL instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `url` - The URL string to parse
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let url = Url::new("https://example.com".to_string());
+    /// ```
+
     pub fn new(url: String) -> Self {
         Self {
             url,
