@@ -185,4 +185,16 @@ mod tests {
         });
         assert_eq!(expected, Url::new(url_str).parse());
     }
+    #[test]
+    fn test_no_schema() {
+        let url_str = "example.com".to_string();
+        let expected = Err("Only HTTP scheme is supported.".to_string());
+        assert_eq!(expected, Url::new(url_str).parse());
+    }
+    #[test]
+    fn test_unsupported_schema() {
+        let url_str = "https://example.com/index.html".to_string();
+        let expected = Err("Only HTTP scheme is supported.".to_string());
+        assert_eq!(expected, Url::new(url_str).parse());
+    }
 }
