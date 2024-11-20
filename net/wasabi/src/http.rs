@@ -1,5 +1,6 @@
 extern crate alloc;
 use alloc::string::String;
+use alloc::vec::Vec;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
 
@@ -11,6 +12,12 @@ impl HttpClient {
     }
 
     pub fn get(&self, host: String, port: u16, path: String) -> Result<HttpResponse, Error> {
-        Ok(HttpResponse::new(200, "OK", ""))
+        Ok(HttpResponse::new(
+            String::from("HTTP/1.1"),
+            200,
+            String::from("OK"),
+            Vec::new(),
+            String::from("")
+        ))
     }
 }
