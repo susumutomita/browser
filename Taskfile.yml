@@ -64,7 +64,9 @@ tasks:
     desc: Run Rust code checks
     cmds:
       - docker compose exec -T browser-dev cargo fmt --all -- --check
-      - docker compose exec -T browser-dev cargo clippy --workspace -- -D warnings
+      - >-
+        docker compose exec -T browser-dev cargo clippy
+        --workspace -- -D warnings
 
   test:
     desc: Run tests in main project and saba_core
