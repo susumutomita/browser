@@ -21,7 +21,7 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// let url = Url::new("https://example.com".to_string());
+    /// let url = saba_core::url::Url::new("https://example.com".to_string());
     /// ```
 
     pub fn new(url: String) -> Self {
@@ -94,9 +94,10 @@ impl Url {
             .splitn(2, '/')
             .collect();
 
-        if url_parts.len() > 2 {
+        if url_parts.len() <= 1 {
             return "".to_string();
         }
+
         let path_and_searchpart: Vec<&str> = url_parts[1].splitn(2, '?').collect();
         path_and_searchpart[0].to_string()
     }
@@ -107,9 +108,10 @@ impl Url {
             .splitn(2, '/')
             .collect();
 
-        if url_parts.len() > 2 {
+        if url_parts.len() <= 1 {
             return "".to_string();
         }
+
         let path_and_searchpart: Vec<&str> = url_parts[1].splitn(2, '?').collect();
         if path_and_searchpart.len() < 2 {
             "".to_string()
@@ -125,14 +127,14 @@ mod tests {
     use super::*;
     #[test]
     fn test_url() {
-        let url = Url::new("http://example.com".to_string());
-        let expected = OK(Url {
-            url: url.clone(),
+        let url_str = "http://example.com".to_string();
+        let expected = Ok(Url {
+            url: url_str.clone(),
             host: "example.com".to_string(),
             port: "80".to_string(),
             path: "".to_string(),
             searchpart: "".to_string(),
         });
-        assert_eq!(expected, Url::new(url).parse());
+        assert_eq!(expected, Url::new(url_str).parse());
     }
 }
