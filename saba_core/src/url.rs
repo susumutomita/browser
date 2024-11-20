@@ -137,4 +137,16 @@ mod tests {
         });
         assert_eq!(expected, Url::new(url_str).parse());
     }
+    #[test]
+    fn test_url_with_port() {
+        let url_str = "http://example.com:8888".to_string();
+        let expected = Ok(Url {
+            url: url_str.clone(),
+            host: "example.com".to_string(),
+            port: "8888".to_string(),
+            path: "".to_string(),
+            searchpart: "".to_string(),
+        });
+        assert_eq!(expected, Url::new(url_str).parse());
+    }
 }
