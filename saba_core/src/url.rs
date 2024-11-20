@@ -126,7 +126,7 @@ impl Url {
 mod tests {
     use super::*;
     #[test]
-    fn test_url() {
+    fn test_url_host() {
         let url_str = "http://example.com".to_string();
         let expected = Ok(Url {
             url: url_str.clone(),
@@ -138,13 +138,25 @@ mod tests {
         assert_eq!(expected, Url::new(url_str).parse());
     }
     #[test]
-    fn test_url_with_port() {
+    fn test_url_host_port() {
         let url_str = "http://example.com:8888".to_string();
         let expected = Ok(Url {
             url: url_str.clone(),
             host: "example.com".to_string(),
             port: "8888".to_string(),
             path: "".to_string(),
+            searchpart: "".to_string(),
+        });
+        assert_eq!(expected, Url::new(url_str).parse());
+    }
+    #[test]
+    fn test_url_host_port_path() {
+        let url_str = "http://example.com:8888/index.html".to_string();
+        let expected = Ok(Url {
+            url: url_str.clone(),
+            host: "example.com".to_string(),
+            port: "8888".to_string(),
+            path: "index.html".to_string(),
             searchpart: "".to_string(),
         });
         assert_eq!(expected, Url::new(url_str).parse());
