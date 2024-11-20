@@ -67,9 +67,10 @@ tasks:
       - docker compose exec -T browser-dev cargo clippy -- -D warnings
 
   test:
-    desc: Run tests
+    desc: Run tests in main project and saba_core
     cmds:
       - docker compose exec -T browser-dev cargo test
+      - docker compose exec -T browser-dev sh -c "cd saba_core && cargo test"
 
   ci:
     desc: Run all CI checks

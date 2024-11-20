@@ -1,3 +1,4 @@
+[![CI](https://github.com/susumutomita/browser/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/susumutomita/browser/actions/workflows/ci.yml)
 # Browser Implementation Project - "Learn by Building"
 
 This repository is for learning and implementing concepts from the book 「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」.
@@ -39,8 +40,8 @@ git submodule update
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone https://github.com/susumutomita/browser.git
+cd browser
 ```
 
 2. Start development environment:
@@ -90,7 +91,6 @@ This project uses GitHub Actions for:
 - Code formatting checks
 - Linting
 - Testing
-- Security scanning with Trivy
 
 ## Troubleshooting
 
