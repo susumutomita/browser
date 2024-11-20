@@ -1,3 +1,4 @@
+[![CI](https://github.com/susumutomita/browser/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/susumutomita/browser/actions/workflows/ci.yml)
 # Browser Implementation Project - "Learn by Building"
 
 This repository is for learning and implementing concepts from the book 「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」.
