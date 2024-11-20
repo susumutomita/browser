@@ -17,7 +17,7 @@ impl HttpClient {
             200,
             String::from("OK"),
             Vec::new(),
-            String::from("")
+            String::from(""),
         ))
     }
 }
