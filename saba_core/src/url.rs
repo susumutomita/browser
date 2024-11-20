@@ -69,7 +69,7 @@ impl Url {
             .collect();
 
         if let Some(index) = url_parts[0].find(':') {
-            return url_parts[0][..index].to_string();
+            url_parts[0][..index].to_string()
         } else {
             url_parts[0].to_string()
         }
@@ -82,7 +82,7 @@ impl Url {
             .collect();
 
         if let Some(index) = url_parts[0].find(':') {
-            return url_parts[0][index + 1..].to_string();
+            url_parts[0][index + 1..].to_string()
         } else {
             "80".to_string()
         }

@@ -5,3 +5,10 @@ edition = "2021"
 
 [dependencies]
 noli = { git = "https://github.com/hikalium/wasabi.git", branch = "for_saba" }
+
+[workspace]
+members = [
+    "saba_core",
+    # その他のクレートがあればここに列挙
+]
+

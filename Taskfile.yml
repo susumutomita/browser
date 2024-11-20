@@ -63,14 +63,15 @@ tasks:
   lint:rust:
     desc: Run Rust code checks
     cmds:
-      - docker compose exec -T browser-dev cargo fmt -- --check
-      - docker compose exec -T browser-dev cargo clippy -- -D warnings
+      - docker compose exec -T browser-dev cargo fmt --all -- --check
+      - >-
+        docker compose exec -T browser-dev cargo clippy
+        --workspace -- -D warnings
 
   test:
     desc: Run tests in main project and saba_core
     cmds:
-      - docker compose exec -T browser-dev cargo test
-      - docker compose exec -T browser-dev sh -c "cd saba_core && cargo test"
+      - docker compose exec -T browser-dev cargo test --workspace
 
   ci:
     desc: Run all CI checks
