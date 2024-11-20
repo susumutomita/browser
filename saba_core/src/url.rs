@@ -1,4 +1,5 @@
 use alloc::string::String;
+use alloc::string::ToString;
 use alloc::vec::Vec;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -120,18 +121,18 @@ impl Url {
 
 #[cfg(test)]
 
-mod tests{
-  use super::*;
-  #[test]
-  fn test_url() {
-    let url = Url::new("http://example.com".to_string());
-    let expected = OK(Url {
-      url: url.clone(),
-      host: "example.com".to_string(),
-      port: "80".to_string(),
-      path: "".to_string(),
-      searchpart: "".to_string(),
-    });
-    assert_eq!(expected,Url::new(url).parse());
-  }
+mod tests {
+    use super::*;
+    #[test]
+    fn test_url() {
+        let url = Url::new("http://example.com".to_string());
+        let expected = OK(Url {
+            url: url.clone(),
+            host: "example.com".to_string(),
+            port: "80".to_string(),
+            path: "".to_string(),
+            searchpart: "".to_string(),
+        });
+        assert_eq!(expected, Url::new(url).parse());
+    }
 }
