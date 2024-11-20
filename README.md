@@ -40,8 +40,8 @@ git submodule update
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone https://github.com/susumutomita/browser.git
+cd browser
 ```
 
 2. Start development environment:
@@ -91,7 +91,6 @@ This project uses GitHub Actions for:
 - Code formatting checks
 - Linting
 - Testing
-- Security scanning with Trivy
 
 ## Troubleshooting
 
