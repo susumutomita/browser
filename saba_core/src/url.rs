@@ -163,14 +163,26 @@ mod tests {
     }
     #[test]
     fn test_url_host_port_path_searchpart() {
-        let url_str = "http://example.com:8888/index.html?name=John".to_string();
+        let url_str = "http://example.com:8888/index.html?name=John&b=2".to_string();
         let expected = Ok(Url {
             url: url_str.clone(),
             host: "example.com".to_string(),
             port: "8888".to_string(),
             path: "index.html".to_string(),
-            searchpart: "name=John".to_string(),
+            searchpart: "name=John&b=2".to_string(),
         });
         assert_eq!(expected, Url::new(url_str).parse());
-      }
+    }
+    #[test]
+    fn test_url_host_path() {
+        let url_str = "http://example.com/index.html".to_string();
+        let expected = Ok(Url {
+            url: url_str.clone(),
+            host: "example.com".to_string(),
+            port: "80".to_string(),
+            path: "index.html".to_string(),
+            searchpart: "".to_string(),
+        });
+        assert_eq!(expected, Url::new(url_str).parse());
+    }
 }
