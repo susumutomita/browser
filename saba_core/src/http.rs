@@ -11,8 +11,20 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
-    pub fn new(version: String, status_code: u32, reason: String, headers: Vec<(String, String)>, body: String) -> Self {
-        Self { version, status_code, reason, headers, body }
+    pub fn new(
+        version: String,
+        status_code: u32,
+        reason: String,
+        headers: Vec<(String, String)>,
+        body: String,
+    ) -> Self {
+        Self {
+            version,
+            status_code,
+            reason,
+            headers,
+            body,
+        }
     }
 }
 
