@@ -5,6 +5,8 @@ use alloc::vec::Vec;
 use core::fmt::Write;
 
 use noli::net::lookup_host;
+use noli::net::SocketAddr;
+use noli::println;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
 
@@ -16,7 +18,7 @@ impl HttpClient {
         Self {}
     }
 
-    pub fn get(&self, host: String, _port: u16, _path: String) -> Result<HttpResponse, Error> {
+    pub fn get(&self, host: String, port: u16, _path: String) -> Result<HttpResponse, Error> {
         let ips = match lookup_host(&host) {
             Ok(ips) => ips,
             Err(e) => {
@@ -32,6 +34,8 @@ impl HttpClient {
             return Err(Error::Network(String::from("No IP Addresses found for")));
         }
 
+        let socket_addr: SocketAddr = (ips[0], port).into();
+        println!("socket_addr: {:?}", socket_addr);
         // 仮のHTTPレスポンスを返します
         Ok(HttpResponse::new(
             String::from("HTTP/1.1"),
