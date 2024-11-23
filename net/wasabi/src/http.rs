@@ -6,6 +6,7 @@ use core::fmt::Write;
 
 use noli::net::lookup_host;
 use noli::net::SocketAddr;
+use noli::net::TcpStream;
 use noli::println;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
@@ -36,6 +37,16 @@ impl HttpClient {
 
         let socket_addr: SocketAddr = (ips[0], port).into();
         println!("socket_addr: {:?}", socket_addr);
+
+        let _stream = match TcpStream::connect(socket_addr) {
+            Ok(stream) => stream,
+            Err(_e) => {
+                return Err(Error::Network(String::from(
+                    "Failed to connect to TCP stream",
+                )))
+            }
+        };
+
         // 仮のHTTPレスポンスを返します
         Ok(HttpResponse::new(
             String::from("HTTP/1.1"),
