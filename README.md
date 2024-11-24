@@ -84,6 +84,18 @@ task run
 task dev
 ```
 
+4. lint
+
+```bash
+task lint
+```
+
+### Testing
+
+```bash
+task test
+```
+
 ## CI/CD
 
 This project uses GitHub Actions for:
