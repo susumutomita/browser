@@ -19,7 +19,7 @@ impl HttpClient {
         Self {}
     }
 
-    pub fn get(&self, host: String, port: u16, _path: String) -> Result<HttpResponse, Error> {
+    pub fn get(&self, host: String, port: u16, path: String) -> Result<HttpResponse, Error> {
         let ips = match lookup_host(&host) {
             Ok(ips) => ips,
             Err(e) => {
@@ -47,6 +47,9 @@ impl HttpClient {
             }
         };
 
+        let mut request = String::from("GET /");
+        request.push_str(&path);
+        request.push_str(" HTTP/1.1\n");
         // 仮のHTTPレスポンスを返します
         Ok(HttpResponse::new(
             String::from("HTTP/1.1"),
