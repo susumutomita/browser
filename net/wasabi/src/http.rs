@@ -64,6 +64,23 @@ impl HttpClient {
             }
         };
 
+        let mut recieved = Vec::new();
+        loop {
+            let mut buffer = [0u8; 1024];
+            let bytes_read = match stream.read(&mut buffer) {
+                Ok(bytes) => bytes,
+                Err(_e) => {
+                    return Err(Error::Network(String::from("Failed to read from stream")));
+                }
+            };
+
+            if bytes_read == 0 {
+                break;
+            }
+
+            recieved.extend_from_slice(&buffer[..bytes_read]);
+        }
+
         // TODO: レスポンスの読み取りと解析を実装
         // 一時的な実装として、基本的なレスポンスを返す
         Ok(HttpResponse::new(
