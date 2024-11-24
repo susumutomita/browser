@@ -50,6 +50,12 @@ impl HttpClient {
         let mut request = String::from("GET /");
         request.push_str(&path);
         request.push_str(" HTTP/1.1\n");
+        request.push_str("Host: ");
+        request.push_str(&host);
+        request.push_str("\r\n");
+        request.push_str("Accept: text/html\r\n");
+        request.push_str("Connection: close\r\n");
+        request.push_str("\r\n");
         // 仮のHTTPレスポンスを返します
         Ok(HttpResponse::new(
             String::from("HTTP/1.1"),
