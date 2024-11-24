@@ -38,7 +38,7 @@ impl HttpClient {
         let socket_addr: SocketAddr = (ips[0], port).into();
         println!("socket_addr: {:?}", socket_addr);
 
-        let _stream = match TcpStream::connect(socket_addr) {
+        let mut stream = match TcpStream::connect(socket_addr) {
             Ok(stream) => stream,
             Err(_e) => {
                 return Err(Error::Network(String::from(
@@ -56,13 +56,22 @@ impl HttpClient {
         request.push_str("Accept: text/html\r\n");
         request.push_str("Connection: close\r\n");
         request.push_str("\r\n");
-        // 仮のHTTPレスポンスを返します
+
+        let _bytes_written = match stream.write(request.as_bytes()) {
+            Ok(bytes) => bytes,
+            Err(_e) => {
+                return Err(Error::Network(String::from("Failed to write to stream")));
+            }
+        };
+
+        // TODO: レスポンスの読み取りと解析を実装
+        // 一時的な実装として、基本的なレスポンスを返す
         Ok(HttpResponse::new(
             String::from("HTTP/1.1"),
             200,
             String::from("OK"),
             Vec::new(),
-            String::from(""),
+            String::new(),
         ))
     }
 }
