@@ -1,9 +1,10 @@
 extern crate alloc;
 
+use crate::http::alloc::string::ToString;
+use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Write;
-
 use noli::net::lookup_host;
 use noli::net::SocketAddr;
 use noli::net::TcpStream;
@@ -77,18 +78,12 @@ impl HttpClient {
             if bytes_read == 0 {
                 break;
             }
-
             recieved.extend_from_slice(&buffer[..bytes_read]);
         }
 
-        // TODO: レスポンスの読み取りと解析を実装
-        // 一時的な実装として、基本的なレスポンスを返す
-        Ok(HttpResponse::new(
-            String::from("HTTP/1.1"),
-            200,
-            String::from("OK"),
-            Vec::new(),
-            String::new(),
-        ))
+        match core::str::from_utf8(&recieved) {
+            Ok(response) => HttpResponse::new(response.to_string()),
+            Err(e) => Err(Error::Network(format!("Invalid recieved response: {}", e))),
+        }
     }
 }
