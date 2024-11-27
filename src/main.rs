@@ -8,7 +8,7 @@ use noli::prelude::*;
 
 fn main() {
     let client = HttpClient::new();
-    match client.get("example.com".to_string(), 80, "/".to_string()) {
+    match client.get("host.test".to_string(), 8000, "/test.html".to_string()) {
         Ok(res) => {
             println!("response: {:?}", res);
         }
