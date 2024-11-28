@@ -23,6 +23,31 @@ impl HtmlTokenizer {
             buf: String::new(),
         }
     }
+    fn is_eof(&self) -> bool {
+        self.pos >= self.input.len()
+    }
+    fn consume_next_input(&mut self) -> char {
+        let c = self.input[self.pos];
+        self.pos += 1;
+        c
+    }
+    fn create_tag(&mut self, start_tag_token: bool) {
+        if start_tag_token {
+            self.latest_token = Some(HtmlToken::StartTag {
+                tag:String::new(),
+                self_closing: false,
+                attributes: Vec::new(),
+            });
+        } else {
+            self.latest_token = Some(HtmlToken::EndTag {
+                tag: String::new(),
+            });
+        }
+    }
+    fn reconsume_input(&mut self) -> char {
+        self.reconsume = false;
+        self.input[self.pos - 1]
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -61,15 +86,15 @@ pub enum State {
     TemporaryBuffer,
 }
 
-// match self.state {
-//     State::Data => {}
-//     State::TagOpen => {}
-//     State::EndTagOpen => {}
-//     State::TagName => {}
-//     State::BeforeAttributeName => {}
-//     State::AttributeName => {}
-//     State::AfterAttributeName => {}
-// }
+match self.state {
+    State::Data => {}
+    State::TagOpen => {}
+    State::EndTagOpen => {}
+    State::TagName => {}
+    State::BeforeAttributeName => {}
+    State::AttributeName => {}
+    State::AfterAttributeName => {}
+}
 
 impl Iterator for HtmlTokenizer {
     type Item = HtmlToken;
@@ -78,10 +103,43 @@ impl Iterator for HtmlTokenizer {
             return None;
         }
         loop {
-            if self.state == State::Data {
-                // Data状態の処理
+            let c = self.consume_next_input();
+            let c = match self.reconsume{
+              true=> self.reconsume_input(),
+              false => self.consume_next_input(),
+            };
+            match self.state {
+                State::Data => {
+                    if c == '<' {
+                        self.state = State::TagOpen;
+                        continue;
+                    }
+                    if self.is_eof() {
+                        return Some(HtmlToken::Eof);
+                    }
+                    return Some(HtmlToken::Character(c));
+                }
+                State::TagOpen => {
+                    if c == '/' {
+                        self.state = State::EndTagOpen;
+                        continue;
+                    }
+                    if c.is_ascii_alphabetic() {
+                      self.reconsume = true;
+
+                        self.state = State::TagName;
+                        self.create_tag(true);
+                        continue;
+                    }
+                    if self.is_eof() {
+                        return Some(HtmlToken::Eof);
+                    }
+                    self.reconsume = true;
+                    self.state = State::Data;
+                }
+                _ => {}
             }
-            // 他の状態の処理
+
         }
     }
 }
