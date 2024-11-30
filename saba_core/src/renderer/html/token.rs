@@ -360,6 +360,37 @@ impl Iterator for HtmlTokenizer {
                     return Some(HtmlToken::Eof);
                   }
                 }
+                State::ScriptData => {
+                  if c == '<' {
+                    self.state = State::ScriptDataLessThanSign;
+                    continue;
+                  }
+                  if self.is_eof() {
+                    return Some(HtmlToken::Eof);
+                  }
+                  return Some(HtmlToken::Char(c));
+                }
+                State::ScriptDataLessThanSign => {
+                  if c == '>' {
+                    self.buf = String::new();
+                    self.state = State::ScriptDataEndTagOpen;
+                    continue;
+                  }
+                  self.reconsume = true;
+                  self.state = State::ScriptData;
+                  return Some(HtmlToken::Char('<'));
+                }
+                State::ScriptDataEndTagOpen => {
+                  if c.is_ascii_alphabetic() {
+                    self.reconsume = true;
+                    self.state = State::ScriptDataEndTagName;
+                    self.create_tag(false);
+                    continue;
+                  }
+                  self.reconsume = true;
+                  self.state = State::ScriptData;
+                  return Some(HtmlToken::Char('<'));
+                }
                 _ => {}
             }
 
