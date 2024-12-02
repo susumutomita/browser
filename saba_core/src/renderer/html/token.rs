@@ -405,7 +405,16 @@ impl Iterator for HtmlTokenizer {
                   self.buf.push(c);
                   continue;
                 }
-                _ => {}
+                State::TemporaryBuffer =>{
+                  self.reconsume = true;
+                  if self.buf.chars().count() ==0 {
+                    self.state = State::ScriptData;
+                    continue;
+                  }
+                  let c = self.buf.chars().nth(0).expect("self.buf should have at least 1 char");
+                  self.buf.remove(0);
+                  return Some(HtmlToken::Char(c));
+                }
             }
 
         }
