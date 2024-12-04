@@ -154,8 +154,7 @@ impl HtmlTokenizer {
     }
     fn take_latest_token(&mut self) -> Option<HtmlToken> {
         assert!(self.latest_token.is_some());
-        let t = self.latest_token.as_ref().cloned();
-        assert!(self.latest_token.is_none());
+        let t = self.latest_token.take();
         t
     }
 
@@ -442,5 +441,24 @@ mod tests {
         let html = "".to_string();
         let mut tokenizer = HtmlTokenizer::new(html.chars().collect());
         assert!(tokenizer.next().is_none());
+    }
+
+    #[test]
+    fn test_start_and_end_tag() {
+        let html = "<body></body>".to_string();
+        let mut tokenizer = HtmlTokenizer::new(html.chars().collect());
+        let expected = [
+            HtmlToken::StartTag {
+                tag: "body".to_string(),
+                self_closing: false,
+                attributes: Vec::new(),
+            },
+            HtmlToken::EndTag {
+                tag: "body".to_string(),
+            },
+        ];
+        for e in expected {
+            assert_eq!(Some(e), tokenizer.next());
+        }
     }
 }
