@@ -154,8 +154,7 @@ impl HtmlTokenizer {
     }
     fn take_latest_token(&mut self) -> Option<HtmlToken> {
         assert!(self.latest_token.is_some());
-        let t = self.latest_token.take();
-        t
+        self.latest_token.take()
     }
 
     fn set_self_closing_flag(&mut self) {
