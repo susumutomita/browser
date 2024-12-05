@@ -434,6 +434,7 @@ impl Iterator for HtmlTokenizer {
 mod tests {
     use super::*;
     use crate::alloc::string::ToString;
+    use alloc::vec;
 
     #[test]
     fn test_empty() {
@@ -454,6 +455,46 @@ mod tests {
             },
             HtmlToken::EndTag {
                 tag: "body".to_string(),
+            },
+        ];
+        for e in expected {
+            assert_eq!(Some(e), tokenizer.next());
+        }
+    }
+
+    #[test]
+    fn test_attributes() {
+        let html = "<p class=\"A\" id='B' foo=bar></p>".to_string();
+        let mut tokenizer = HtmlTokenizer::new(html.chars().collect());
+        let mut attrl = Attribute::new("class".to_string(), "A".to_string());
+        attrl.add_char('c', true);
+        attrl.add_char('l', true);
+        attrl.add_char('a', true);
+        attrl.add_char('s', true);
+        attrl.add_char('s', true);
+        attrl.add_char('A', false);
+
+        let mut attr2 = Attribute::new("id".to_string(), "B".to_string());
+        attr2.add_char('i', true);
+        attr2.add_char('d', true);
+        attr2.add_char('B', false);
+
+        let mut attr3 = Attribute::new("foo".to_string(), "bar".to_string());
+        attr3.add_char('f', true);
+        attr3.add_char('o', true);
+        attr3.add_char('o', true);
+        attr3.add_char('b', false);
+        attr3.add_char('a', false);
+        attr3.add_char('r', false);
+
+        let expected = [
+            HtmlToken::StartTag {
+                tag: "p".to_string(),
+                self_closing: false,
+                attributes: vec![attrl, attr2, attr3],
+            },
+            HtmlToken::EndTag {
+                tag: "p".to_string(),
             },
         ];
         for e in expected {
