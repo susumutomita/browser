@@ -105,7 +105,7 @@ impl HtmlTokenizer {
                     self_closing: _,
                     ref mut attributes,
                 } => {
-                    attributes.push(Attribute::new(String::new(), String::new()));
+                    attributes.push(Attribute::new());
                 }
                 _ => panic!("'latest_token' should be StartTag"),
             }
@@ -466,7 +466,7 @@ mod tests {
     fn test_attributes() {
         let html = "<p class=\"A\" id='B' foo=bar></p>".to_string();
         let mut tokenizer = HtmlTokenizer::new(html.chars().collect());
-        let mut attrl = Attribute::new("class".to_string(), "A".to_string());
+        let mut attrl = Attribute::new();
         attrl.add_char('c', true);
         attrl.add_char('l', true);
         attrl.add_char('a', true);
@@ -474,12 +474,12 @@ mod tests {
         attrl.add_char('s', true);
         attrl.add_char('A', false);
 
-        let mut attr2 = Attribute::new("id".to_string(), "B".to_string());
+        let mut attr2 = Attribute::new();
         attr2.add_char('i', true);
         attr2.add_char('d', true);
         attr2.add_char('B', false);
 
-        let mut attr3 = Attribute::new("foo".to_string(), "bar".to_string());
+        let mut attr3 = Attribute::new();
         attr3.add_char('f', true);
         attr3.add_char('o', true);
         attr3.add_char('o', true);
