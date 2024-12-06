@@ -201,7 +201,6 @@ impl Iterator for HtmlTokenizer {
                     }
                     if c.is_ascii_alphabetic() {
                         self.reconsume = true;
-
                         self.state = State::TagName;
                         self.create_tag(true);
                         continue;
@@ -213,10 +212,16 @@ impl Iterator for HtmlTokenizer {
                     self.state = State::Data;
                 }
                 State::EndTagOpen => {
-                    self.reconsume = true;
-                    self.state = State::TagName;
-                    self.create_tag(false);
-                    continue;
+                    if self.is_eof() {
+                        return Some(HtmlToken::Eof);
+                    }
+
+                    if c.is_ascii_alphabetic() {
+                        self.reconsume = true;
+                        self.state = State::TagName;
+                        self.create_tag(false);
+                        continue;
+                    }
                 }
                 State::TagName => {
                     if c == ' ' {
@@ -329,7 +334,7 @@ impl Iterator for HtmlTokenizer {
                         self.state = State::BeforeAttributeName;
                         continue;
                     }
-                    if c == '/' {
+                    if c == '>' {
                         self.state = State::Data;
                         return self.take_latest_token();
                     }
@@ -340,6 +345,7 @@ impl Iterator for HtmlTokenizer {
                 }
                 State::AfterAttributeValueQuoted => {
                     if c == ' ' {
+                        self.state = State::BeforeAttributeName;
                         continue;
                     }
                     if c == '/' {
@@ -354,7 +360,7 @@ impl Iterator for HtmlTokenizer {
                         return Some(HtmlToken::Eof);
                     }
                     self.reconsume = true;
-                    self.state = State::AttributeValueUnQuoted;
+                    self.state = State::BeforeAttributeName;
                 }
                 State::SelfClosingStartTag => {
                     if c == '>' {
