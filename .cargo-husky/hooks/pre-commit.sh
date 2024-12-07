@@ -1,1 +1,2 @@
 task lint
+task ci
