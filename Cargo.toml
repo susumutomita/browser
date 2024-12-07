@@ -21,3 +21,9 @@ required-features = ["wasabi"]
 saba_core = { path = "./saba_core" }
 net_wasabi = { path = "./net/wasabi", optional = true }
 noli = { git = "https://github.com/hikalium/wasabi.git", branch = "for_saba", optional = true }
+cargo-husky = "1.5.0"
+
+[dev-dependencies.cargo-husky]
+version = "1"
+default-features = false
+features = ["user-hooks"]
