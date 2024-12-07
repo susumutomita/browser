@@ -25,3 +25,4 @@ cargo-husky = "1.5.0"
 
 [package.metadata.husky.hooks]
 pre-commit = "task ci"
+pre-push = "task ci"
