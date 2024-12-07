@@ -22,4 +22,4 @@ COPY rust-toolchain.toml .
 # Rustツールチェインのインストール
 RUN rustup show
 
-CMD ["/bin/bash"] 
+CMD ["/bin/bash"]
