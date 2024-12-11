@@ -101,6 +101,32 @@ impl HtmlParser {
         false
     }
 
+    fn pop_until(&mut self, kind: ElementKind) {
+        assert!(
+            self.contain_in_stack(element_kind),
+            "stack doesn't have an element {:?}",
+            element_kind,
+        );
+        loop {
+            let current = self.stack_of_open_elements.pop(){
+                Some(n) => n,
+                None => return,
+            };
+            if current.borrow().element_kind() == Some(element_kind) {
+                break;
+            }
+        }
+    }
+
+    fn contain_in_stack(&mut self, element_kind: ElementKind) -> bool {
+      for i in 0..self.stack_of_open_elements.len() {
+        if self.stack_of_open_elements[i].borrow().element_kind() == Some(element_kind) {
+          return true;
+        }
+      }
+      false
+    }
+
     pub fn construct_tree(&mut self) -> Rc<RefCell<Window>> {
         let mut token = self.t.next();
         while token.is_some() {
