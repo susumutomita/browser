@@ -51,13 +51,13 @@ pub struct HtmlTokenizer {
 }
 
 impl HtmlTokenizer {
-    pub fn new(input: Vec<char>) -> Self {
+    pub fn new(html: String) -> Self {
         Self {
             state: State::Data,
             pos: 0,
             reconsume: false,
             latest_token: None,
-            input,
+            input: html.chars().collect(),
             buf: String::new(),
         }
     }
