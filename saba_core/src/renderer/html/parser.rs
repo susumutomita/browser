@@ -43,6 +43,11 @@ impl HtmlParser {
             t,
         }
     }
+    fn create_char(&self,c: char) -> Node {
+      let mut s = String::new();
+      s.push(c);
+      Node::new(NodeKind::Text(s))
+    }
     fn create_element(&self, tag: &str, attributes: Vec<Attribute>) -> Node {
         Node::new(NodeKind::Element(Element::new(tag, attributes)))
     }
@@ -126,12 +131,6 @@ impl HtmlParser {
         }
       }
       false
-    }
-
-    fn create_char(&self,c: char) -> Node {
-      let mut s = String::new();
-      s.push(c);
-      Node::new(NodeKind::Text(s))
     }
 
     fn insert_char(&mut self,c:char){
