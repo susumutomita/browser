@@ -89,6 +89,18 @@ impl HtmlParser {
         self.stack_of_open_elements.push(node);
     }
 
+    fn pop_current_node(&mut self, kind: ElementKind) -> bool {
+        let current = match self.stack_of_open_elements.last() {
+            Some(n) => n.clone(),
+            None => return false,
+        };
+        if current.borrow().element_kind() == Some(element_kind) {
+            self.stack_of_open_elements.pop();
+            return true;
+        }
+        false
+    }
+
     pub fn construct_tree(&mut self) -> Rc<RefCell<Window>> {
         let mut token = self.t.next();
         while token.is_some() {
