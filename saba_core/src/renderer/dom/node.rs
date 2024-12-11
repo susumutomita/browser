@@ -14,8 +14,8 @@ pub struct Node {
     window: Weak<RefCell<Window>>,
     parent: Weak<RefCell<Node>>,
     first_child: Option<Rc<RefCell<Node>>>,
-    last_child: Weak<Rc<RefCell<Node>>>,
-    previou_sibling: Weak<Rc<RefCell<Node>>>,
+    last_child: Weak<RefCell<Node>>,
+    previous_sibling: Weak<RefCell<Node>>,
     next_sibling: Option<Rc<RefCell<Node>>>,
 }
 
@@ -27,7 +27,7 @@ impl Node {
             parent: Weak::new(),
             first_child: None,
             last_child: Weak::new(),
-            previou_sibling: Weak::new(),
+            previous_sibling: Weak::new(),
             next_sibling: None,
         }
     }
@@ -61,17 +61,17 @@ impl Node {
     pub fn first_child(&self) -> Option<Rc<RefCell<Node>>> {
         self.first_child.clone()
     }
-    pub fn set_last_child(&mut self, last_child: Weak<Rc<RefCell<Node>>>) {
+    pub fn set_last_child(&mut self, last_child: Weak<RefCell<Node>>) {
         self.last_child = last_child;
     }
-    pub fn last_child(&self) -> Weak<Rc<RefCell<Node>>> {
+    pub fn last_child(&self) -> Weak<RefCell<Node>> {
         self.last_child.clone()
     }
-    pub fn set_previous_sibling(&mut self, previous_sibling: Weak<Rc<RefCell<Node>>>) {
-        self.previou_sibling = previous_sibling;
+    pub fn set_previous_sibling(&mut self, previous_sibling: Weak<RefCell<Node>>) {
+        self.previous_sibling = previous_sibling;
     }
-    pub fn previous_sibling(&self) -> Weak<Rc<RefCell<Node>>> {
-        self.previou_sibling.clone()
+    pub fn previous_sibling(&self) -> Weak<RefCell<Node>> {
+        self.previous_sibling.clone()
     }
     pub fn set_next_sibling(&mut self, next_sibling: Option<Rc<RefCell<Node>>>) {
         self.next_sibling = next_sibling;

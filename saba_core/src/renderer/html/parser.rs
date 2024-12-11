@@ -58,8 +58,9 @@ impl HtmlParser {
             None => window.document(),
         };
 
-        let node = Rc::new(RefCell::new(self.create_element(tag, attributes)));
+        // let node = Rc::new(RefCell::new(self.create_element(tag, attributes)));
 
+        let node = Rc::new(RefCell::new(self.create_element(tag, attributes)));
         if current.borrow().first_child().is_some() {
             let mut last_sibiling = current.borrow().first_child();
             loop {
@@ -157,7 +158,7 @@ impl HtmlParser {
                 .unwrap()
                 .borrow_mut()
                 .set_next_sibling(Some(node.clone()));
-            node.borrow_mut().set_privious_sibling(Rc::downgrade(
+            node.borrow_mut().set_previous_sibling(Rc::downgrade(
                 &current
                     .borrow()
                     .first_child()
@@ -392,9 +393,38 @@ impl HtmlParser {
                     }
                     self.mode = self.original_insertion_mode;
                 }
+                InsertionMode::Text => {
+                    match token {
+                        Some(HtmlToken::Eof) | None => {
+                            return self.window.clone();
+                        }
+                        Some(HtmlToken::EndTag { ref tag }) => {
+                            if tag == "style" {
+                                self.pop_until(ElementKind::Style);
+                                self.mode = self.original_insertion_mode;
+                                token = self.t.next();
+                                continue;
+                            }
+                            if tag == "script" {
+                                self.pop_until(ElementKind::Script);
+                                self.mode = self.original_insertion_mode;
+                                token = self.t.next();
+                                continue;
+                            }
+                        }
+                        Some(HtmlToken::Char(c)) => {
+                            self.insert_char(c);
+                            token = self.t.next();
+                            continue;
+                        }
+                        _ => {}
+                    }
+
+                    self.mode = self.original_insertion_mode;
+                } // end of InsertionMode::Text
                 InsertionMode::AfterBody => {
                     match token {
-                        Some(HtmlToken::Char(c)) => {
+                        Some(HtmlToken::Char(_c)) => {
                             token = self.t.next();
                             continue;
                         }
@@ -414,7 +444,7 @@ impl HtmlParser {
                 }
                 InsertionMode::AfterAfterBody => {
                     match token {
-                        Some(HtmlToken::Char(c)) => {
+                        Some(HtmlToken::Char(_c)) => {
                             token = self.t.next();
                             continue;
                         }
