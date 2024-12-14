@@ -25,7 +25,7 @@ Data xx xx xx
     </html>
     "#;
 
-fn main() {
+fn main() -> u64 {
     let browser = Browser::new();
     let response =
         HttpResponse::new(TEST_HTTP_RESPONSE.to_string()).expect("failed to parse http response");
