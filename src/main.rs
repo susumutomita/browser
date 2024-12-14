@@ -6,7 +6,7 @@ use crate::alloc::string::ToString;
 use net_wasabi::http::HttpClient;
 use noli::prelude::*;
 use noli::*;
-use saba_core::browser::browser;
+use saba_core::browser::Browser;
 use saba_core::http::HttpResponse;
 
 static TEST_HTTP_RESPONSE: &str = r#"HTTP/1.1 200 OK
