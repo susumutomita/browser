@@ -12,7 +12,7 @@ Data xx xx xx
 <html>
     <head></head>
     <body>
-        <h1 if=title>H1 Title</h1>
+        <h1 id=title>H1 Title</h1>
         <h2 class="class">H2 title</h2>
         <p>Test text.</p>
         <p>
