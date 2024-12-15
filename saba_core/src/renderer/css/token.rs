@@ -1,4 +1,5 @@
 use alloc::string::String;
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CssToken {
@@ -14,4 +15,19 @@ pub enum CssToken {
     Ident(String),
     StringToken(String),
     AtKeyword(String),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CssTokenizer {
+    pos: usize,
+    input: Vec<char>,
+}
+
+impl CssTokenizer {
+    pub fn new(css: String) -> Self {
+        Self {
+            pos: 0,
+            input: css.chars().collect(),
+        }
+    }
 }
