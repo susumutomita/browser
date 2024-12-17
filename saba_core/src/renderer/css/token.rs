@@ -76,6 +76,21 @@ impl CssTokenizer {
         }
         num
     }
+    fn consume_ident_token(&mut self) -> String {
+        let mut s = String::new();
+        s.push(self.input[self.pos]);
+        loop {
+            self.pos += 1;
+            let c = self.input[self.pos];
+            match c {
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' => {
+                    s.push(c);
+                }
+                _ => break,
+            }
+        }
+        s
+    }
 }
 
 impl Iterator for CssTokenizer {
@@ -93,6 +108,34 @@ impl Iterator for CssTokenizer {
                 }
                 '0'..='9' => {
                     let t = CssToken::Number(self.consume_numeric_token());
+                    self.pos -= 1;
+                    t
+                }
+                '#' => {
+                    let value = self.consume_ident_token();
+                    self.pos -= 1;
+                    CssToken::HashToken(value)
+                }
+                '_' => {
+                    let t = CssToken::Ident(self.consume_ident_token());
+                    self.pos -= 1;
+                    t
+                }
+                '@' => {
+                    if self.input[self.pos + 1].is_ascii_alphabetic()
+                        && self.input[self.pos + 2].is_alphanumeric()
+                        && self.input[self.pos + 3].is_alphanumeric()
+                    {
+                        self.pos += 1;
+                        let t = CssToken::AtKeyword(self.consume_ident_token());
+                        self.pos -= 1;
+                        t
+                    } else {
+                        CssToken::Delim('@')
+                    }
+                }
+                'a'..='z' | 'A'..='Z' => {
+                    let t = CssToken::Ident(self.consume_ident_token());
                     self.pos -= 1;
                     t
                 }
