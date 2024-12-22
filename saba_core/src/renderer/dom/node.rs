@@ -6,6 +6,8 @@ use alloc::rc::Weak;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::cell::RefCell;
+use core::fmt::Display;
+use core::fmt::Formatter;
 use core::str::FromStr;
 
 #[derive(Debug, Clone)]
@@ -155,6 +157,13 @@ impl Element {
     pub fn kind(&self) -> ElementKind {
         self.kind
     }
+
+    pub fn is_block_element(&self) -> bool {
+        match self.kind {
+            ElementKind::Body | ElementKind::H1 | ElementKind::H2 | ElementKind::P => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -179,11 +188,28 @@ impl FromStr for ElementKind {
             "style" => Ok(ElementKind::Style),
             "script" => Ok(ElementKind::Script),
             "body" => Ok(ElementKind::Body),
-            "p" => Ok(ElementKind::P),
             "h1" => Ok(ElementKind::H1),
             "h2" => Ok(ElementKind::H2),
+            "p" => Ok(ElementKind::P),
             "a" => Ok(ElementKind::A),
             _ => Err(format!("unimplement element name {:?}", s)),
         }
+    }
+}
+
+impl Display for ElementKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        let s = match self {
+            ElementKind::Html => "html",
+            ElementKind::Head => "head",
+            ElementKind::Style => "style",
+            ElementKind::Script => "script",
+            ElementKind::Body => "body",
+            ElementKind::P => "p",
+            ElementKind::H1 => "h1",
+            ElementKind::H2 => "h2",
+            ElementKind::A => "a",
+        };
+        write!(f, "{}", s)
     }
 }
