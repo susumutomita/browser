@@ -1,9 +1,14 @@
 use crate::error::Error;
+use crate::renderer::dom::node::ElementKind;
+use crate::renderer::dom::node::Node;
+use crate::renderer::dom::node::NodeKind;
 use alloc::format;
+use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::string::ToString;
+use core::cell::RefCell;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum DisplayType {
     Block,
     Inline,
@@ -11,16 +16,29 @@ pub enum DisplayType {
 }
 
 // 2. TextDecorationの定義を追加
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextDecoration {
     None,
     Underline,
 }
 
-// 3. FontSizeの定義を追加
-#[derive(Debug, Clone, PartialEq)]
-pub struct FontSize {
-    pub value: i64,
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum FontSize {
+    Medium,
+    XLarge,
+    XXLarge,
+}
+impl FontSize {
+    fn default(node: &Rc<RefCell<Node>>) -> Self {
+        match &node.borrow().kind() {
+            NodeKind::Element(element) => match element.kind() {
+                ElementKind::H1 => FontSize::XXLarge,
+                ElementKind::H2 => FontSize::XLarge,
+                _ => FontSize::Medium,
+            },
+            _ => FontSize::Medium,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -28,7 +46,7 @@ pub struct ComputedStyle {
     background_color: Option<Color>,
     color: Option<Color>,
     display: Option<DisplayType>,
-    font_size: Option<i64>,
+    font_size: Option<FontSize>,
     text_decoration: Option<TextDecoration>,
     height: Option<i64>,
     width: Option<i64>,
@@ -79,21 +97,19 @@ impl ComputedStyle {
 
     pub fn display(&self) -> DisplayType {
         self.display
-            .clone()
             .expect("failed to access Css property: display")
     }
 
     pub fn font_size(&self) -> FontSize {
-        FontSize {
-            value: self
-                .font_size
-                .expect("failed to access Css property: font_size"),
-        }
+        self.font_size
+            .expect("failed to access CSS property: font_size")
     }
-
+    pub fn set_font_size_default(&mut self, node: &Rc<RefCell<Node>>) {
+        let fs = FontSize::default(node);
+        self.font_size = Some(fs);
+    }
     pub fn text_decoration(&self) -> TextDecoration {
         self.text_decoration
-            .clone()
             .expect("failed to access Css property: text_decoration")
     }
 
