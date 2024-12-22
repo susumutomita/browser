@@ -1,4 +1,4 @@
-use crate::renderer::css::cssom::StyleSheet;
+use crate::renderer::css::cssom::cssom::StyleSheet;
 use crate::renderer::dom::api::get_target_element_node;
 use crate::renderer::dom::node::ElementKind;
 use crate::renderer::dom::node::Node;
@@ -15,7 +15,9 @@ impl LayoutView {
     pub fn new(root: Rc<RefCell<Node>>, cssom: &StyleSheet) -> Self {
         let body_root = get_target_element_node(Some(root), ElementKind::Body);
 
-        let mut tree = Self { root: None };
+        let mut tree = Self {
+            root: build_layout_tree(&body_root.unwrap(), cssom),
+        };
         tree.update_layout();
         tree
     }
@@ -23,4 +25,15 @@ impl LayoutView {
     pub fn root(&self) -> Option<Rc<RefCell<LayoutObject>>> {
         self.root.clone()
     }
+    fn update_layout(&mut self) {
+        // レイアウト更新ロジックを実装
+    }
+}
+
+fn build_layout_tree(
+    node: &Rc<RefCell<Node>>,
+    cssom: &StyleSheet,
+) -> Option<Rc<RefCell<LayoutObject>>> {
+    // 実装を追加
+    None // 一時的な実装
 }

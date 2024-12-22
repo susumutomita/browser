@@ -4,6 +4,26 @@ use alloc::string::String;
 use alloc::string::ToString;
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum DisplayType {
+    Block,
+    Inline,
+    None,
+}
+
+// 2. TextDecorationの定義を追加
+#[derive(Debug, Clone, PartialEq)]
+pub enum TextDecoration {
+    None,
+    Underline,
+}
+
+// 3. FontSizeの定義を追加
+#[derive(Debug, Clone, PartialEq)]
+pub struct FontSize {
+    pub value: i64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ComputedStyle {
     background_color: Option<Color>,
     color: Option<Color>,
@@ -58,9 +78,12 @@ impl ComputedStyle {
     }
 
     pub fn font_size(&self) -> FontSize {
-        self.font_size
-            .clone()
-            .expect("failed to access Css property: font_size")
+        FontSize {
+            value: self
+                .font_size
+                .clone()
+                .expect("failed to access Css property: font_size"),
+        }
     }
 
     pub fn text_decoration(&self) -> TextDecoration {
@@ -101,7 +124,7 @@ impl Color {
             "green" => "#00FF00",
             "blue" => "#0000FF",
             _ => {
-                return Err(Error::UnexpectedInput(formt!(
+                return Err(Error::UnexpectedInput(format!(
                     "color name {:?} is not supported yet",
                     name
                 )));
@@ -109,13 +132,13 @@ impl Color {
         };
         Ok(Self {
             name: Some(name.to_string()),
-            code,
+            code: code.to_string(),
         })
     }
 
     pub fn from_code(code: &str) -> Result<Self, Error> {
         if code.chars().nth(0) != Some('#') || code.len() != 7 {
-            return Err(Error::UnexpectedInput(formt!(
+            return Err(Error::UnexpectedInput(format!(
                 "invalid color code {}",
                 code
             )));
@@ -127,7 +150,7 @@ impl Color {
             "#00FF00" => "green".to_string(),
             "#0000FF" => "blue".to_string(),
             _ => {
-                return Err(Error::UnexpectedInput(formt!(
+                return Err(Error::UnexpectedInput(format!(
                     "color code {:?} is not supported yet",
                     code
                 )));
@@ -154,6 +177,6 @@ impl Color {
     }
 
     pub fn code_u32(&self) -> u32 {
-        u32::from_str_radix(&self.code.trimg_start_matches('#'), 16).unwrap()
+        u32::from_str_radix(&self.code.trim_start_matches('#'), 16).unwrap()
     }
 }

@@ -42,7 +42,7 @@ impl LayoutObject {
         self.next_sibling.as_ref().cloned()
     }
 
-    pub fn parent(&self) -> weak<RefCell<Self>> {
+    pub fn parent(&self) -> Weak<RefCell<Self>> {
         self.parent.clone()
     }
 
@@ -59,7 +59,7 @@ impl LayoutObject {
     }
 
     pub fn new(node: Rc<RefCell<Node>>, parent_obj: &Option<Rc<RefCell<LayoutObject>>>) -> Self {
-        let parent = match parenet_obj {
+        let parent = match parent_obj {
             Some(p) => Rc::downgrade(p),
             None => Weak::new(),
         };

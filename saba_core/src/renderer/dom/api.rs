@@ -24,7 +24,7 @@ pub fn get_target_element_node(
             if result1.is_none() && result2.is_none() {
                 return None;
             }
-            if result1.ins_node() {
+            if result1.is_none() {
                 return result2;
             }
             result1
