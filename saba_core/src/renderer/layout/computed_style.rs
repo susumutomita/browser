@@ -123,11 +123,24 @@ pub struct Color {
 impl Color {
     pub fn from_name(name: &str) -> Result<Self, Error> {
         let code = match name {
-            "black" => "#000000",
-            "white" => "#FFFFFF",
-            "red" => "#FF0000",
-            "green" => "#00FF00",
-            "blue" => "#0000FF",
+            "black" => "#000000".to_string(),
+            "silver" => "#C0C0C0".to_string(),
+            "gray" => "#808080".to_string(),
+            "white" => "#FFFFFF".to_string(),
+            "maroon" => "#800000".to_string(),
+            "red" => "#FF0000".to_string(),
+            "purple" => "#800080".to_string(),
+            "fuchsia" => "#FF00FF".to_string(),
+            "green" => "#00FF00".to_string(),
+            "lime" => "#00FF00".to_string(),
+            "olive" => "#808000".to_string(),
+            "yellow" => "#FFFF00".to_string(),
+            "navy" => "#000080".to_string(),
+            "blue" => "#0000FF".to_string(),
+            "teal" => "#008080".to_string(),
+            "aqua" => "#00FFFF".to_string(),
+            "orange" => "#FFA500".to_string(),
+            "lightgray" => "#D3D3D3".to_string(),
             _ => {
                 return Err(Error::UnexpectedInput(format!(
                     "color name {:?} is not supported yet",
@@ -150,10 +163,23 @@ impl Color {
         }
         let name = match code {
             "#000000" => "black".to_string(),
+            "#C0C0C0" => "silver".to_string(),
+            "#808080" => "gray".to_string(),
             "#FFFFFF" => "white".to_string(),
+            "#800000" => "maroon".to_string(),
             "#FF0000" => "red".to_string(),
-            "#00FF00" => "green".to_string(),
+            "#800080" => "purple".to_string(),
+            "#FF00FF" => "fuchsia".to_string(),
+            "#008000" => "green".to_string(),
+            "#00FF00" => "lime".to_string(),
+            "#808000" => "olive".to_string(),
+            "#FFFF00" => "yellow".to_string(),
+            "#000080" => "navy".to_string(),
             "#0000FF" => "blue".to_string(),
+            "#008080" => "teal".to_string(),
+            "#00FFFF" => "aqua".to_string(),
+            "#FFA500" => "orange".to_string(),
+            "#D3D3D3" => "lightgray".to_string(),
             _ => {
                 return Err(Error::UnexpectedInput(format!(
                     "color code {:?} is not supported yet",
