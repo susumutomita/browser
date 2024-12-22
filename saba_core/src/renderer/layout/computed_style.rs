@@ -1,3 +1,8 @@
+use crate::error::Error;
+use alloc::format;
+use alloc::string::String;
+use alloc::string::ToString;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct ComputedStyle {
     background_color: Option<Color>,
@@ -78,5 +83,59 @@ impl ComputedStyle {
 
     pub fn width(&self) -> i64 {
         self.width.expect("failed to access Css property: width")
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Color {
+    name: Option<String>,
+    code: String,
+}
+
+impl Color {
+    pub fn from_name(name: &str) -> Result<Self, Error> {
+        let code = match name {
+            "black" => "#000000",
+            "white" => "#FFFFFF",
+            "red" => "#FF0000",
+            "green" => "#00FF00",
+            "blue" => "#0000FF",
+            _ => {
+                return Err(Error::UnexpectedInput(formt!(
+                    "color name {:?} is not supported yet",
+                    name
+                )));
+            }
+        };
+        Ok(Self {
+            name: Some(name.to_string()),
+            code,
+        })
+    }
+
+    pub fn from_code(code: &str) -> Result<Self, Error> {
+        if code.chars().nth(0) != Some('#') || code.len() != 7 {
+            return Err(Error::UnexpectedInput(formt!(
+                "invalid color code {}",
+                code
+            )));
+        }
+        let name = match code {
+            "#000000" => "black".to_string(),
+            "#FFFFFF" => "white".to_string(),
+            "#FF0000" => "red".to_string(),
+            "#00FF00" => "green".to_string(),
+            "#0000FF" => "blue".to_string(),
+            _ => {
+                return Err(Error::UnexpectedInput(formt!(
+                    "color code {:?} is not supported yet",
+                    code
+                )));
+            }
+        };
+        Ok(Self {
+            name: Some(name),
+            code: code.to_string(),
+        })
     }
 }
