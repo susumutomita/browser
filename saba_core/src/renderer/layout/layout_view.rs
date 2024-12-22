@@ -15,9 +15,7 @@ impl LayoutView {
     pub fn new(root: Rc<RefCell<Node>>, cssom: &StyleSheet) -> Self {
         let body_root = get_target_element_node(Some(root), ElementKind::Body);
 
-        let mut tree = Self {
-            root: build_layout_tree(&body_root, &None, cssom),
-        };
+        let mut tree = Self { root: None };
         tree.update_layout();
         tree
     }

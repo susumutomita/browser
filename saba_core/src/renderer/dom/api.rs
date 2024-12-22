@@ -6,7 +6,6 @@ use alloc::rc::Rc;
 use alloc::string::ToString;
 use alloc::vec::Vec;
 use core::cell::RefCell;
-use core::result;
 
 pub fn get_target_element_node(
     node: Option<Rc<RefCell<Node>>>,
