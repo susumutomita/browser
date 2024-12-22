@@ -34,6 +34,12 @@ pub struct ComputedStyle {
     width: Option<i64>,
 }
 
+impl Default for ComputedStyle {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ComputedStyle {
     pub fn new() -> Self {
         Self {
@@ -81,7 +87,6 @@ impl ComputedStyle {
         FontSize {
             value: self
                 .font_size
-                .clone()
                 .expect("failed to access Css property: font_size"),
         }
     }
@@ -177,6 +182,6 @@ impl Color {
     }
 
     pub fn code_u32(&self) -> u32 {
-        u32::from_str_radix(&self.code.trim_start_matches('#'), 16).unwrap()
+        u32::from_str_radix(self.code.trim_start_matches('#'), 16).unwrap()
     }
 }

@@ -1,4 +1,4 @@
-use crate::renderer::css::cssom::cssom::StyleSheet;
+use crate::renderer::css::cssom::StyleSheet;
 use crate::renderer::dom::api::get_target_element_node;
 use crate::renderer::dom::node::ElementKind;
 use crate::renderer::dom::node::Node;
@@ -31,9 +31,8 @@ impl LayoutView {
 }
 
 fn build_layout_tree(
-    node: &Rc<RefCell<Node>>,
-    cssom: &StyleSheet,
+    _node: &Rc<RefCell<Node>>,
+    _cssom: &StyleSheet,
 ) -> Option<Rc<RefCell<LayoutObject>>> {
-    // 実装を追加
-    None // 一時的な実装
+    None // 仮実装
 }
