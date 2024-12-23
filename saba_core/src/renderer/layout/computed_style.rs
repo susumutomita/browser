@@ -15,6 +15,33 @@ pub enum DisplayType {
     None,
 }
 
+impl DisplayType {
+    fn default(node: &Rc<RefCell<Node>>) -> Self {
+        match &node.borrow().kind() {
+            NodeKind::Document => DisplayType::Block,
+            NodeKind::Element(e) => {
+                if e.is_block_element() {
+                    DisplayType::Block
+                } else {
+                    DisplayType::Inline
+                }
+            }
+            NodeKind::Text(_) => DisplayType::Inline,
+        }
+    }
+    pub fn from_str_display(s: &str) -> Result<Self, Error> {
+        match s {
+            "block" => Ok(Self::Block),
+            "inline" => Ok(Self::Inline),
+            "none" => Ok(Self::None),
+            _ => Err(Error::UnexpectedInput(format!(
+                "display type {:?} is not supported yet",
+                s
+            ))),
+        }
+    }
+}
+
 // 2. TextDecorationの定義を追加
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TextDecoration {
@@ -98,6 +125,11 @@ impl ComputedStyle {
     pub fn display(&self) -> DisplayType {
         self.display
             .expect("failed to access Css property: display")
+    }
+
+    pub fn set_display_type_default(&mut self, node: &Rc<RefCell<Node>>) {
+        let display_type = DisplayType::default(node);
+        self.display = Some(display_type);
     }
 
     pub fn font_size(&self) -> FontSize {
