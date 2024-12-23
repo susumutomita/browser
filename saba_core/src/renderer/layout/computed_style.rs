@@ -48,6 +48,17 @@ pub enum TextDecoration {
     None,
     Underline,
 }
+impl TextDecoration {
+    fn default(node: &Rc<RefCell<Node>>) -> Self {
+        match &node.borrow().kind() {
+            NodeKind::Element(element) => match element.kind() {
+                ElementKind::A => TextDecoration::Underline,
+                _ => TextDecoration::None,
+            },
+            _ => TextDecoration::None,
+        }
+    }
+}
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum FontSize {
@@ -143,6 +154,12 @@ impl ComputedStyle {
     pub fn text_decoration(&self) -> TextDecoration {
         self.text_decoration
             .expect("failed to access Css property: text_decoration")
+    }
+
+    pub fn set_text_decoration_default(&mut self, node: &Rc<RefCell<Node>>) -> TextDecoration {
+        let text_decoration = TextDecoration::default(node);
+        self.text_decoration = Some(text_decoration);
+        text_decoration
     }
 
     pub fn set_height(&mut self, height: i64) {
