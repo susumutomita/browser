@@ -164,6 +164,10 @@ impl Element {
             ElementKind::Body | ElementKind::H1 | ElementKind::H2 | ElementKind::P
         )
     }
+
+    pub fn attributes(&self) -> Vec<Attribute> {
+        self.attributes.clone()
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

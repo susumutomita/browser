@@ -12,7 +12,7 @@ use core::cell::RefCell;
 pub enum DisplayType {
     Block,
     Inline,
-    None,
+    DisplayNone,
 }
 
 impl DisplayType {
@@ -33,7 +33,7 @@ impl DisplayType {
         match s {
             "block" => Ok(Self::Block),
             "inline" => Ok(Self::Inline),
-            "none" => Ok(Self::None),
+            "none" => Ok(Self::DisplayNone),
             _ => Err(Error::UnexpectedInput(format!(
                 "display type {:?} is not supported yet",
                 s
@@ -131,6 +131,47 @@ impl ComputedStyle {
 
     pub fn set_display(&mut self, display: DisplayType) {
         self.display = Some(display);
+    }
+
+    pub fn defaulting(&mut self, node: &Rc<RefCell<Node>>, parent_style: Option<ComputedStyle>) {
+        if let Some(parent_style) = parent_style {
+            if self.background_color.is_none() && parent_style.background_color() != Color::white()
+            {
+                self.background_color = Some(parent_style.background_color());
+            }
+            if self.color.is_none() && parent_style.color() != Color::black() {
+                self.color = Some(parent_style.color());
+            }
+            if self.font_size.is_none() && parent_style.font_size() != FontSize::Medium {
+                self.font_size = Some(parent_style.font_size());
+            }
+            if self.text_decoration.is_none()
+                && parent_style.text_decoration() != TextDecoration::None
+            {
+                self.text_decoration = Some(parent_style.text_decoration());
+            }
+        }
+        if self.background_color.is_none() {
+            self.set_background_color(Color::white());
+        }
+        if self.color.is_none() {
+            self.set_color(Color::black());
+        }
+        if self.display.is_none() {
+            self.set_display_type_default(node);
+        }
+        if self.font_size.is_none() {
+            self.set_font_size_default(node);
+        }
+        if self.text_decoration.is_none() {
+            self.set_text_decoration_default(node);
+        }
+        if self.height.is_none() {
+            self.set_height(0);
+        }
+        if self.width.is_none() {
+            self.set_width(0);
+        }
     }
 
     pub fn display(&self) -> DisplayType {
