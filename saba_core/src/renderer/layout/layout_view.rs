@@ -164,3 +164,35 @@ fn build_layout_tree(
     }
     layout_object
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::alloc::string::String;
+    use crate::alloc::string::ToString;
+    use crate::renderer::css::cssom::CssParser;
+    use crate::renderer::css::token::CssTokenizer;
+    use crate::renderer::dom::api::get_style_content;
+    // use crate::renderer::dom::node::Element;
+    // use crate::renderer::dom::node::Node;
+    // use crate::renderer::dom::node::NodeKind;
+    use crate::renderer::html::parser::HtmlParser;
+    use crate::renderer::html::token::HtmlTokenizer;
+    // use alloc::vec::Vec;
+
+    fn create_layout_view(html: String) -> LayoutView {
+        let t = HtmlTokenizer::new(html);
+        let windows = HtmlParser::new(t).construct_tree();
+        let dom = windows.borrow().document();
+        let style = get_style_content(dom.clone());
+        let css_tokenizer = CssTokenizer::new(style);
+        let cssom = CssParser::new(css_tokenizer).parse_stylesheet();
+        LayoutView::new(dom, &cssom)
+    }
+
+    #[test]
+    fn test_empty() {
+        let layout_view = create_layout_view("".to_string());
+        assert_eq!(layout_view.root(), None);
+    }
+}
