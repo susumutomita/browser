@@ -250,4 +250,11 @@ mod tests {
                 .node_kind()
         );
     }
+    #[test]
+    fn test_display_none() {
+        let html = "<html><head><style>body{display: none;}</style></head><body>text</body></html>"
+            .to_string();
+        let layout_view = create_layout_view(html);
+        assert_eq!(None, layout_view.root());
+    }
 }
