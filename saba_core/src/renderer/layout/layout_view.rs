@@ -167,6 +167,7 @@ fn build_layout_tree(
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
     use crate::alloc::string::String;
     use crate::alloc::string::ToString;
@@ -174,7 +175,6 @@ mod tests {
     use crate::renderer::css::token::CssTokenizer;
     use crate::renderer::dom::api::get_style_content;
     use crate::renderer::dom::node::Element;
-    // use crate::renderer::dom::node::Node;
     use crate::renderer::dom::node::NodeKind;
     use crate::renderer::html::parser::HtmlParser;
     use crate::renderer::html::token::HtmlTokenizer;
@@ -256,5 +256,48 @@ mod tests {
             .to_string();
         let layout_view = create_layout_view(html);
         assert_eq!(None, layout_view.root());
+    }
+
+    #[test]
+    fn test_hidden_class() {
+        let html = r#"<html><head><style>.hidden{
+        display: none;}
+        </style></head><body><a class="hidden">link 1</a><p></p><p class="hidden"><a>link 2</a></p></body></html>"#.to_string();
+        let layout_view = create_layout_view(html);
+        let root = layout_view.root();
+        assert!(root.is_some());
+        assert_eq!(
+            LayoutObjectKind::Block,
+            root.clone().expect("root should exist").borrow().kind()
+        );
+        assert_eq!(
+            NodeKind::Element(Element::new("body", Vec::new())),
+            root.clone()
+                .expect("root should exist")
+                .borrow()
+                .node_kind()
+        );
+        let p = root.expect("root should exist").borrow().first_child();
+        assert!(p.is_some());
+        assert_eq!(
+            LayoutObjectKind::Block,
+            p.clone().expect("p node should exist").borrow().kind()
+        );
+        assert_eq!(
+            NodeKind::Element(Element::new("p", Vec::new())),
+            p.clone().expect("p node should exist").borrow().node_kind()
+        );
+
+        assert!(p
+            .clone()
+            .expect("p node should exist")
+            .borrow()
+            .first_child()
+            .is_none());
+        assert!(p
+            .expect("p npde should exist")
+            .borrow()
+            .next_sibling()
+            .is_none());
     }
 }
