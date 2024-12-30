@@ -49,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Install Tarpaulin
         run: cargo install cargo-tarpaulin  --locked
@@ -57,7 +59,7 @@ jobs:
         run: cargo tarpaulin --workspace --out Xml --out Html
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: |
