@@ -6,15 +6,22 @@ use alloc::rc::Rc;
 use alloc::rc::Weak;
 use core::cell::RefCell;
 
+use crate::display_item::DisplayItem;
+use crate::renderer::css::cssom::StyleSheet;
 use crate::renderer::html::parser::HtmlParser;
 use crate::renderer::html::token::HtmlTokenizer;
+use crate::renderer::layout::layout_view::LayoutView;
 use crate::utils::convert_dom_to_string;
 use alloc::string::String;
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
 pub struct Page {
     browser: Weak<RefCell<Browser>>,
     frame: Option<Rc<RefCell<Window>>>,
+    style: Option<StyleSheet>,
+    layout_view: Option<LayoutView>,
+    display_items: Vec<DisplayItem>,
 }
 
 impl Page {
@@ -22,6 +29,9 @@ impl Page {
         Self {
             browser: Weak::new(),
             frame: None,
+            style: None,
+            layout_view: None,
+            display_items: Vec::new(),
         }
     }
 
@@ -31,6 +41,18 @@ impl Page {
 
     pub fn set_frame(&mut self, frame: Rc<RefCell<Window>>) {
         self.frame = Some(frame);
+    }
+
+    pub fn set_style(&mut self, style: StyleSheet) {
+        self.style = Some(style);
+    }
+
+    pub fn set_layout_view(&mut self, layout_view: LayoutView) {
+        self.layout_view = Some(layout_view);
+    }
+
+    pub fn set_display_items(&mut self, display_items: Vec<DisplayItem>) {
+        self.display_items = display_items;
     }
 
     pub fn receive_response(&mut self, response: HttpResponse) -> String {
