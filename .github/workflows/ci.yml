@@ -50,14 +50,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Update Rust to latest stable
+      - name: Force stable override in CI
         run: |
-          rustup update stable
-          rustup default stable
-          rustc --version  # バージョン確認
+          rustup override set stable
+          rustc --version
 
       - name: Install Tarpaulin
-        run: cargo install cargo-tarpaulin --locked
+        run: cargo install cargo-tarpaulin
 
       - name: Run Tarpaulin
         run: cargo tarpaulin --out Xml
