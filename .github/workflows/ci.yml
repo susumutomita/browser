@@ -45,6 +45,27 @@ jobs:
       - name: Run tests
         run: cargo test --workspace
 
+  rust-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install Tarpaulin
+        run: cargo install cargo-tarpaulin  --locked
+
+      - name: Run Tarpaulin
+        run: cargo tarpaulin --workspace --out Xml --out Html
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: |
+            cobertura.xml
+            tarpaulin-report.html
+
   docker:
     runs-on: ubuntu-latest
     steps:
