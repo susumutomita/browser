@@ -50,16 +50,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Force stable override in CI
-        run: |
-          rustup override set stable
-          rustc --version
-
       - name: Install Tarpaulin
-        run: cargo install cargo-tarpaulin
+        run: cargo install cargo-tarpaulin  --locked
 
       - name: Run Tarpaulin
-        run: cargo tarpaulin --out Xml
+        run: cargo tarpaulin --workspace --out Xml
 
 
   docker:
