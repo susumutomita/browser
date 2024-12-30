@@ -1,8 +1,8 @@
----
 name: CI
 
 on:
   push:
+  pull_request:
 
 jobs:
   lint:
@@ -53,18 +53,39 @@ jobs:
           submodules: true
 
       - name: Install Tarpaulin
-        run: cargo install cargo-tarpaulin  --locked
+        run: cargo install cargo-tarpaulin --locked
 
+      # Tarpaulinの出力を tee でファイルにも保存する
       - name: Run Tarpaulin
-        run: cargo tarpaulin --workspace --out Xml --out Html
+        run: cargo tarpaulin --workspace --out Xml --out Html | tee tarpaulin_output.txt
 
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
+      # 標準出力からカバレッジ概要行を抜き出し、coverage_summary.txt に保存
+      # （Tarpaulinのバージョンや出力フォーマットによって grep パターンを調整）
+      - name: Extract coverage summary
+        run: |
+          grep 'coverage,' tarpaulin_output.txt > coverage_summary.txt || echo "No coverage info found" > coverage_summary.txt
+
+      # Pull Request 上でのみコメントを投稿するように条件指定
+      - name: Post coverage comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v6
         with:
-          name: code-coverage-report
-          path: |
-            cobertura.xml
-            tarpaulin-report.html
+          script: |
+            const fs = require('fs');
+            const coverageSummary = fs.readFileSync('coverage_summary.txt', 'utf8').trim();
+
+            if (coverageSummary === "No coverage info found") {
+              console.log("No coverage info found. Skip commenting.");
+              return;
+            }
+
+            // Pull Requestにコメントを投稿
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `**Tarpaulin Coverage Report**\n\`\`\`\n${coverageSummary}\n\`\`\``
+            });
 
   docker:
     runs-on: ubuntu-latest
