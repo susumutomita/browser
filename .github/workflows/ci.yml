@@ -49,20 +49,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
+      - name: Update Rust to latest stable
+        run: |
+          rustup update stable
+          rustup default stable
+          rustc --version  # バージョン確認
 
       - name: Install Tarpaulin
         run: cargo install cargo-tarpaulin
 
       - name: Run Tarpaulin
         run: cargo tarpaulin --out Xml
+
 
   docker:
     runs-on: ubuntu-latest
