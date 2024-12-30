@@ -57,7 +57,7 @@ jobs:
           rustc --version  # バージョン確認
 
       - name: Install Tarpaulin
-        run: cargo install cargo-tarpaulin
+        run: cargo install cargo-tarpaulin --locked
 
       - name: Run Tarpaulin
         run: cargo tarpaulin --out Xml
