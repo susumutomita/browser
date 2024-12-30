@@ -45,6 +45,25 @@ jobs:
       - name: Run tests
         run: cargo test --workspace
 
+  rust-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2024-01-01
+          components: rustfmt, clippy
+
+      - name: Install Tarpaulin
+        run: cargo install cargo-tarpaulin
+
+      - name: Run Tarpaulin
+        run: cargo tarpaulin --out Xml
+
   docker:
     runs-on: ubuntu-latest
     steps:
