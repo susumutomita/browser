@@ -1,11 +1,3 @@
-//! https://www.w3.org/TR/cssom/
-//!
-//! This is a part of "3. Tokenizing and Parsing CSS" in the "CSS Syntax Module Level 3" spec.
-//! https://www.w3.org/TR/css-syntax-3/#tokenizing-and-parsing
-//!
-//! 5. Parsing
-//! https://www.w3.org/TR/css-syntax-3/#parsing
-
 use crate::renderer::css::token::CssToken;
 use crate::renderer::css::token::CssTokenizer;
 use alloc::string::String;
@@ -305,10 +297,7 @@ impl CssParser {
         let rule = AtRule::new();
 
         loop {
-            let token = match self.t.next() {
-                Some(t) => t,
-                None => return None,
-            };
+            let token = self.t.next()?;
 
             match token {
                 CssToken::OpenCurly => {
@@ -332,10 +321,7 @@ impl CssParser {
         let mut rule = QualifiedRule::new();
 
         loop {
-            let token = match self.t.peek() {
-                Some(t) => t,
-                None => return None,
-            };
+            let token = self.t.peek()?;
 
             match token {
                 CssToken::OpenCurly => {

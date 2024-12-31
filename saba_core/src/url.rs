@@ -23,7 +23,6 @@ impl Url {
     /// ```
     /// let url = saba_core::url::Url::new("https://example.com".to_string());
     /// ```
-
     pub fn new(url: String) -> Self {
         Self {
             url,
