@@ -4,6 +4,11 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -55,24 +60,31 @@ jobs:
       - name: Install Tarpaulin
         run: cargo install cargo-tarpaulin --locked
 
-      # Tarpaulinの出力を tee でファイルにも保存する
+      # Tarpaulinの出力を tee でファイルにも保存
       - name: Run Tarpaulin
-        run: cargo tarpaulin --workspace --out Xml --out Html | tee tarpaulin_output.txt
+        run: |
+          cargo tarpaulin \
+            --workspace \
+            --out Xml \
+            --out Html \
+            | tee tarpaulin_output.txt
 
-      # 標準出力からカバレッジ概要行を抜き出し、coverage_summary.txt に保存
-      # （Tarpaulinのバージョンや出力フォーマットによって grep パターンを調整）
+      # 標準出力から「coverage,」を含む行を抜き出しファイル保存
       - name: Extract coverage summary
         run: |
-          grep 'coverage,' tarpaulin_output.txt > coverage_summary.txt || echo "No coverage info found" > coverage_summary.txt
+          grep 'coverage,' tarpaulin_output.txt > coverage_summary.txt \
+            || echo "No coverage info found" > coverage_summary.txt
 
-      # Pull Request 上でのみコメントを投稿するように条件指定
+      # Pull Request 上のみコメントを投稿
       - name: Post coverage comment
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const coverageSummary = fs.readFileSync('coverage_summary.txt', 'utf8').trim();
+            const coverageSummary = fs
+              .readFileSync('coverage_summary.txt', 'utf8')
+              .trim();
 
             if (coverageSummary === "No coverage info found") {
               console.log("No coverage info found. Skip commenting.");
@@ -84,7 +96,11 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `**Tarpaulin Coverage Report**\n\`\`\`\n${coverageSummary}\n\`\`\``
+              body:
+                "**Tarpaulin Coverage Report**\n" +
+                "```\n" +
+                coverageSummary +
+                "\n```"
             });
 
   docker:
