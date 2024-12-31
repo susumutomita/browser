@@ -1,8 +1,13 @@
----
 name: CI
 
 on:
   push:
+  pull_request:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   lint:
@@ -53,18 +58,50 @@ jobs:
           submodules: true
 
       - name: Install Tarpaulin
-        run: cargo install cargo-tarpaulin  --locked
+        run: cargo install cargo-tarpaulin --locked
 
+      # Tarpaulinの出力を tee でファイルにも保存
       - name: Run Tarpaulin
-        run: cargo tarpaulin --workspace --out Xml --out Html
+        run: |
+          cargo tarpaulin \
+            --workspace \
+            --out Xml \
+            --out Html \
+            | tee tarpaulin_output.txt
 
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
+      # 標準出力から「coverage,」を含む行を抜き出しファイル保存
+      - name: Extract coverage summary
+        run: |
+          grep 'coverage,' tarpaulin_output.txt > coverage_summary.txt \
+            || echo "No coverage info found" > coverage_summary.txt
+
+      # Pull Request 上のみコメントを投稿
+      - name: Post coverage comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
         with:
-          name: code-coverage-report
-          path: |
-            cobertura.xml
-            tarpaulin-report.html
+          script: |
+            const fs = require('fs');
+            const coverageSummary = fs
+              .readFileSync('coverage_summary.txt', 'utf8')
+              .trim();
+
+            if (coverageSummary === "No coverage info found") {
+              console.log("No coverage info found. Skip commenting.");
+              return;
+            }
+
+            // Pull Requestにコメントを投稿
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body:
+                "**Tarpaulin Coverage Report**\n" +
+                "```\n" +
+                coverageSummary +
+                "\n```"
+            });
 
   docker:
     runs-on: ubuntu-latest
