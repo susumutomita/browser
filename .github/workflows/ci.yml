@@ -60,7 +60,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2024-01-01
+          toolchain: nightly
           components: rustfmt, clippy
 
       - name: Install Tarpaulin
