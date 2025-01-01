@@ -30,16 +30,16 @@ impl LayoutView {
     }
 
     fn paint_node(node: &Option<Rc<RefCell<LayoutObject>>>, display_items: &mut Vec<DisplayItem>) {
-        match node {
-            Some(n) => {
-                display_items.extend(n.borrow_mut().paint());
-                let first_child = n.borrow().first_child();
-                Self::paint_node(&first_child, display_items);
-                let next_sibling = n.borrow().next_sibling();
-                Self::paint_node(&next_sibling, display_items);
-            }
-            None => (),
+        // match node {
+        if let Some(n) = node {
+            display_items.extend(n.borrow_mut().paint());
+            let first_child = n.borrow().first_child();
+            Self::paint_node(&first_child, display_items);
+            let next_sibling = n.borrow().next_sibling();
+            Self::paint_node(&next_sibling, display_items);
         }
+        //     None => (),
+        // }
     }
     pub fn paint(&self) -> Vec<DisplayItem> {
         let mut display_items = Vec::new();

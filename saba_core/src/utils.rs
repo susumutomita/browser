@@ -15,14 +15,14 @@ fn convert_dom_to_string_internal(
     depth: usize,
     result: &mut String,
 ) {
-    match node {
-        Some(n) => {
-            result.push_str(&" ".repeat(depth));
-            result.push_str(&format!("{:?}", n.borrow().kind()));
-            result.push('\n');
-            convert_dom_to_string_internal(&n.borrow().first_child(), depth + 1, result);
-            convert_dom_to_string_internal(&n.borrow().next_sibling(), depth, result);
-        }
-        None => (),
+    // match node {
+    if let Some(n) = node {
+        result.push_str(&" ".repeat(depth));
+        result.push_str(&format!("{:?}", n.borrow().kind()));
+        result.push('\n');
+        convert_dom_to_string_internal(&n.borrow().first_child(), depth + 1, result);
+        convert_dom_to_string_internal(&n.borrow().next_sibling(), depth, result);
     }
+    //     None => (),
+    // }
 }
