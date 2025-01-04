@@ -1,4 +1,5 @@
 use crate::alloc::string::ToString;
+use alloc::format;
 use alloc::rc::Rc;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
@@ -6,6 +7,7 @@ use noli::window::StringSize;
 use noli::window::Window;
 use saba_core::browser::Browser;
 use saba_core::constants::*;
+use saba_core::error::Error;
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -16,6 +18,27 @@ pub struct WasabiUI {
 
 #[allow(dead_code)]
 impl WasabiUI {
+    fn setup(&mut self) -> Result<(), Error> {
+        if let Err(error) = self.setup_toolbar() {
+            return Err(Error::InvalidUI(format!(
+                "failed to initialize a toolbar with error: {:#?}",
+                error
+            )));
+        }
+        self.window.flush();
+        Ok(())
+    }
+
+    pub fn start(&mut self) -> Result<(), Error> {
+        self.setup()?;
+        self.run_app()?;
+        Ok(())
+    }
+
+    fn run_app(&mut self) -> Result<(), Error> {
+        Ok(())
+    }
+
     fn setup_toolbar(&mut self) -> OsResult<()> {
         self.window
             .fill_rect(LIGHT_GRAY, 0, 0, WINDOW_WIDTH, TOOLBAR_HEIGHT)?;
