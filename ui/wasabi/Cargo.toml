@@ -1,5 +1,5 @@
 [package]
-name = "ui-wasabi"
+name = "ui_wasabi"
 version = "0.1.0"
 edition = "2024"
 
