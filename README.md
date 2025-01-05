@@ -134,6 +134,17 @@ task logs
 4. Push to the branch
 5. Create a Pull Request
 
+## Note
+
+Start QEMU GUI you need to change Makefile under build/wasabi/Makefile.
+
+```build/wasabi/Makefile
+ifndef DISPLAY
+# QEMU_ARGS+= -vnc 0.0.0.0:$(PORT_OFFSET_VNC),password=on
+QEMU_ARGS+= -display cocoa
+endif
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
