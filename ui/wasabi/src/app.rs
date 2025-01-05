@@ -33,6 +33,12 @@ pub struct WasabiUI {
 
 #[allow(dead_code)]
 impl WasabiUI {
+    fn handle_key_input(&mut self) -> Result<(), Error> {
+        // if let Some(c) = Api::read_key() {
+        //     println!("input text: {:?}", c);
+        // }
+        Ok(())
+    }
     fn handle_mouse_input(&mut self) -> Result<(), Error> {
         // if let Some(MouseEvent {
         //     button: button,
@@ -67,6 +73,7 @@ impl WasabiUI {
     fn run_app(&mut self) -> Result<(), Error> {
         loop {
             self.handle_mouse_input()?;
+            self.handle_key_input()?;
         }
     }
 
