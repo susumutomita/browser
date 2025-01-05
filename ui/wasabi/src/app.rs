@@ -6,7 +6,18 @@ use noli::error::Result as OsResult;
 use noli::window::StringSize;
 use noli::window::Window;
 use saba_core::browser::Browser;
-use saba_core::constants::*;
+use saba_core::constants::ADDRESS_BAR_HEIGHT;
+use saba_core::constants::BLACK;
+use saba_core::constants::DARK_GRAY;
+use saba_core::constants::GRAY;
+use saba_core::constants::LIGHT_GRAY;
+use saba_core::constants::TITLE_BAR_HEIGHT;
+use saba_core::constants::TOOLBAR_HEIGHT;
+use saba_core::constants::WHITE;
+use saba_core::constants::WINDOW_HEIGHT;
+use saba_core::constants::WINDOW_INIT_X_POS;
+use saba_core::constants::WINDOW_INIT_Y_POS;
+use saba_core::constants::WINDOW_WIDTH;
 use saba_core::error::Error;
 
 #[derive(Debug)]
