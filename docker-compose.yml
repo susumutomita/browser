@@ -1,7 +1,7 @@
 ---
 services:
   browser-dev:
-    platform: linux/arm64
+    platform: linux/amd64
     build: .
     restart: unless-stopped
     healthcheck:
