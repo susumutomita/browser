@@ -52,9 +52,11 @@ impl WasabiUI {
             InputMode::Editing => {
                 // if let Some(c) = Api::read_key() {
                 //     if c == 0x7F as char || c == 0x08 as char {
-                //         self.input_url.pop();
+                self.input_url.pop();
+                self.update_address_bar()?;
                 //     } else {
-                //         self.input_url.push(c);
+                self.input_url.push(c);
+                self.update_address_bar()?;
                 //     }
                 // }
             }
