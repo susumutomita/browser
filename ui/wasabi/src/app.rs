@@ -100,6 +100,28 @@ impl WasabiUI {
         );
         Ok(())
     }
+    fn clear_address_bar(&mut self) -> Result<(), Error> {
+        if self
+            .window
+            .fill_rect(WHITE, 72, 4, WINDOW_WIDTH - 76, ADDRESS_BAR_HEIGHT - 2)
+            .is_err()
+        {
+            return Err(Error::InvalidUI(
+                "failed to clear an address bar".to_string(),
+            ));
+        }
+
+        self.window.flush_area(
+            Rect::new(
+                WINDOW_INIT_X_POS,
+                WINDOW_INIT_Y_POS + TITLE_BAR_HEIGHT,
+                WINDOW_WIDTH,
+                TOOLBAR_HEIGHT,
+            )
+            .expect("failed to create a rect for the address bar"),
+        );
+        Ok(())
+    }
     fn handle_mouse_input(&mut self) -> Result<(), Error> {
         // if let Some(MouseEvent {
         //     button: button,
