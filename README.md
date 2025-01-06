@@ -1,5 +1,6 @@
-[![CI](https://github.com/susumutomita/browser/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/susumutomita/browser/actions/workflows/ci.yml)
 # Browser Implementation Project - "Learn by Building"
+
+[![CI](https://github.com/susumutomita/browser/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/susumutomita/browser/actions/workflows/ci.yml)
 
 This repository is for learning and implementing concepts from the book 「［作って学ぶ］ブラウザのしくみ ──HTTP、HTML、CSS、JavaScriptの裏側」.
 
@@ -44,7 +45,7 @@ git clone https://github.com/susumutomita/browser.git
 cd browser
 ```
 
-2. Start development environment:
+1. Start development environment:
 
 ```bash
 task up
@@ -72,19 +73,19 @@ task up
 task up
 ```
 
-2. Run the application:
+1. Run the application:
 
 ```bash
 task run
 ```
 
-3. For development with hot-reload:
+1. For development with hot-reload:
 
 ```bash
 task dev
 ```
 
-4. lint
+1. lint
 
 ```bash
 task lint
@@ -114,13 +115,13 @@ If you encounter any issues:
 docker info
 ```
 
-2. Rebuild the development environment:
+1. Rebuild the development environment:
 
 ```bash
 task rebuild
 ```
 
-3. Check logs:
+1. Check logs:
 
 ```bash
 task logs
