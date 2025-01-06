@@ -55,7 +55,7 @@ impl WasabiUI {
                 self.input_url.pop();
                 self.update_address_bar()?;
                 //     } else {
-                self.input_url.push(c);
+                // self.input_url.push(c);
                 self.update_address_bar()?;
                 //     }
                 // }
