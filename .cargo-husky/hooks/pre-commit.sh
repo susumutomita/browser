@@ -1,2 +1,1 @@
-task lint
-task ci
+# task before-commit
