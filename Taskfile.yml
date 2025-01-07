@@ -73,8 +73,8 @@ tasks:
     cmds:
       - docker compose exec -T browser-dev cargo test --workspace
 
-  ci:
-    desc: Run all CI checks
+  before-commit:
+    desc: Run all checks
     cmds:
       - task lint
       - task test
