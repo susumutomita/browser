@@ -27,14 +27,12 @@ use saba_core::constants::WINDOW_WIDTH;
 use saba_core::error::Error;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[allow(dead_code)]
 enum InputMode {
     Normal,
     Editing,
 }
 
 #[derive(Debug)]
-#[allow(dead_code)]
 pub struct WasabiUI {
     browser: Rc<RefCell<Browser>>,
     input_url: String,
@@ -130,9 +128,31 @@ impl WasabiUI {
             position,
         }) = Api::get_mouse_cursor_info()
         {
-            println!("mouse position {:?}", position);
             if button.l() || button.c() || button.r() {
                 println!("mouse clicked {:?}", button);
+                let relative_pos = (
+                    position.x - WINDOW_INIT_X_POS,
+                    position.y - WINDOW_INIT_Y_POS,
+                );
+
+                if relative_pos.0 >= 0
+                    || relative_pos.0 > WINDOW_WIDTH
+                    || relative_pos.1 < 0
+                    || relative_pos.1 > TOOLBAR_HEIGHT
+                {
+                    println!("button clicked OUTSIDE the window: {button:?} {position:?}");
+                    return Ok(());
+                }
+                if relative_pos.1 < TOOLBAR_HEIGHT + TITLE_BAR_HEIGHT
+                    && relative_pos.1 >= TITLE_BAR_HEIGHT
+                {
+                    self.clear_address_bar()?;
+                    self.input_url = String::new();
+                    self.input_mode = InputMode::Editing;
+                    println!("button clicked in toolbar: {button:?} {position:?}");
+                    return Ok(());
+                }
+                self.inoput_mode = InputMode::Normal;
             }
         }
         Ok(())
