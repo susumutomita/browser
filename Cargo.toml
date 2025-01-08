@@ -1,5 +1,5 @@
 [workspace]
-members = ["net/wasabi", "saba_core"]
+members = ["net/wasabi", "saba_core", "ui/wasabi"]
 
 [package]
 authors = ["susumu tomita <oyster880@gmail.com>"]
@@ -9,7 +9,6 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-
 wasabi = ["dep:net_wasabi", "dep:ui_wasabi", "dep:noli"]
 
 [[bin]]
