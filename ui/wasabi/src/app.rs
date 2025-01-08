@@ -1,4 +1,5 @@
 use crate::alloc::string::ToString;
+use crate::cursor::Cursor;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
@@ -38,10 +39,28 @@ pub struct WasabiUI {
     input_url: String,
     input_mode: InputMode,
     window: Window,
+    cursor: Cursor,
 }
 
 #[allow(dead_code)]
 impl WasabiUI {
+    pub fn new(browser: Rc<RefCell<Browser>>) -> Self {
+        Self {
+            browser,
+            input_url: String::new(),
+            input_mode: InputMode::Normal,
+            window: Window::new(
+                "saba".to_string(),
+                WHITE,
+                WINDOW_INIT_X_POS,
+                WINDOW_INIT_Y_POS,
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT,
+            )
+            .unwrap(),
+            cursor: Cursor::new(),
+        }
+    }
     fn handle_key_input(&mut self) -> Result<(), Error> {
         match self.input_mode {
             InputMode::Normal => {
@@ -128,6 +147,10 @@ impl WasabiUI {
             position,
         }) = Api::get_mouse_cursor_info()
         {
+            self.window.flush_area(self.cursor.rect());
+            self.cursor.set_position(position.x, position.y);
+            self.window.flush_area(self.cursor.rect());
+            self.cursor.flush();
             if button.l() || button.c() || button.r() {
                 println!("mouse clicked {:?}", button);
                 let relative_pos = (
@@ -152,7 +175,7 @@ impl WasabiUI {
                     println!("button clicked in toolbar: {button:?} {position:?}");
                     return Ok(());
                 }
-                self.inoput_mode = InputMode::Normal;
+                self.input_mode = InputMode::Normal;
             }
         }
         Ok(())
@@ -214,21 +237,5 @@ impl WasabiUI {
         self.window
             .draw_line(GRAY, 71, 3, 71, 1 + ADDRESS_BAR_HEIGHT)?;
         Ok(())
-    }
-    pub fn new(browser: Rc<RefCell<Browser>>) -> Self {
-        Self {
-            browser,
-            input_url: String::new(),
-            input_mode: InputMode::Normal,
-            window: Window::new(
-                "saba".to_string(),
-                WHITE,
-                WINDOW_INIT_X_POS,
-                WINDOW_INIT_Y_POS,
-                WINDOW_WIDTH,
-                WINDOW_HEIGHT,
-            )
-            .unwrap(),
-        }
     }
 }
