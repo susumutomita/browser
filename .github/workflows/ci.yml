@@ -45,10 +45,10 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run clippy
-        run: cargo clippy --workspace -- -D warnings
+        run: cargo clippy --workspace  --exclude ui_wasabi -- -D warnings
 
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --exclude ui_wasabi
 
   rust-coverage:
     runs-on: ubuntu-latest
@@ -71,6 +71,7 @@ jobs:
         run: |
           cargo tarpaulin \
             --workspace \
+            --exclude ui_wasabi \
             --out Xml \
             --out Html \
             | tee tarpaulin_output.txt

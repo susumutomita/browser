@@ -4,11 +4,11 @@ use alloc::rc::Rc;
 use alloc::string::String;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
-// use noli::prelude::SystemApi;
-// use noli::println;
+use noli::prelude::SystemApi;
+use noli::println;
 use noli::rect::Rect;
-// use noli::sys::api::MouseEvent;
-// use noli::sys::wasabi::Api;
+use noli::sys::api::MouseEvent;
+use noli::sys::wasabi::Api;
 use noli::window::StringSize;
 use noli::window::Window;
 use saba_core::browser::Browser;
@@ -47,18 +47,18 @@ impl WasabiUI {
     fn handle_key_input(&mut self) -> Result<(), Error> {
         match self.input_mode {
             InputMode::Normal => {
-                // let _ = Api::read_key();
+                let _ = Api::read_key();
             }
             InputMode::Editing => {
-                // if let Some(c) = Api::read_key() {
-                //     if c == 0x7F as char || c == 0x08 as char {
-                self.input_url.pop();
-                self.update_address_bar()?;
-                //     } else {
-                // self.input_url.push(c);
-                self.update_address_bar()?;
-                //     }
-                // }
+                if let Some(c) = Api::read_key() {
+                    if c == 0x7F as char || c == 0x08 as char {
+                        self.input_url.pop();
+                        self.update_address_bar()?;
+                    } else {
+                        self.input_url.push(c);
+                        self.update_address_bar()?;
+                    }
+                }
             }
         }
         Ok(())
@@ -125,16 +125,16 @@ impl WasabiUI {
         Ok(())
     }
     fn handle_mouse_input(&mut self) -> Result<(), Error> {
-        // if let Some(MouseEvent {
-        //     button: button,
-        //     position,
-        // }) = Api::get_mouse_cursor_info()
-        // {
-        //     println!("mouse position {:?}", position);
-        //     if button.l() || button.c() || button.r() {
-        //         println!("mouse clicked {:?}", button);
-        //     }
-        // }
+        if let Some(MouseEvent {
+            button: button,
+            position,
+        }) = Api::get_mouse_cursor_info()
+        {
+            println!("mouse position {:?}", position);
+            if button.l() || button.c() || button.r() {
+                println!("mouse clicked {:?}", button);
+            }
+        }
         Ok(())
     }
 

@@ -10,16 +10,13 @@ RUN apt-get update && apt-get install -y \
 
 # Rustのインストール
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# 環境変数の設定
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /app
 
-# rust-toolchain.tomlをコピー
 COPY rust-toolchain.toml .
-
-# Rustツールチェインのインストール
 RUN rustup show
+
+RUN rustup target add x86_64-unknown-none
 
 CMD ["/bin/bash"]

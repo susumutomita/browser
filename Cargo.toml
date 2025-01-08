@@ -9,7 +9,6 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["wasabi"]
 wasabi = ["dep:net_wasabi", "dep:ui_wasabi", "dep:noli"]
 
 [[bin]]
