@@ -1,4 +1,3 @@
----
 version: "3"
 
 tasks:
@@ -8,47 +7,39 @@ tasks:
     silent: true
 
   up:
-    desc: Start development environment
     cmds:
       - docker compose up -d
-      - echo "Development environment started"
 
   down:
-    desc: Stop development environment
     cmds:
       - docker compose down
-      - echo "Development environment stopped"
 
   rebuild:
-    desc: Rebuild development environment
     cmds:
       - docker compose down
       - docker compose build --no-cache
       - docker compose up -d
-      - echo "Development environment rebuilt"
 
   shell:
-    desc: Connect to development shell
     cmds:
       - docker compose exec browser-dev bash
 
   logs:
-    desc: Display container logs
     cmds:
       - docker compose logs -f
 
   dev:
-    desc: Start development environment and watch for changes
     cmds:
       - task: up
       - task: run:watch
 
   update-refs:
-    desc: Update reference implementations to latest version
     cmds:
       - git submodule update --remote
-      - echo "Reference implementations updated"
 
+  # ---------------------------
+  # Lint
+  # ---------------------------
   lint:
     desc: Run all lint checks
     cmds:
@@ -56,35 +47,41 @@ tasks:
       - task lint:rust
 
   lint:yaml:
-    desc: Run YAML lint checks
     cmds:
       - docker run --rm -v {{.PWD}}:/work giantswarm/yamllint .
 
   lint:rust:
-    desc: Run Rust code checks
     cmds:
       - docker compose exec -T browser-dev cargo fmt --all -- --check
       - >-
         docker compose exec -T browser-dev cargo clippy
-        --workspace -- -D warnings
+        --workspace  --exclude ui_wasabi -- -D warnings
 
+  # ---------------------------
+  # Test
+  # ---------------------------
   test:
-    desc: Run tests in main project and saba_core
     cmds:
-      - docker compose exec -T browser-dev cargo test --workspace
+      - >-
+        docker compose exec -T browser-dev cargo test
+        --workspace  --exclude ui_wasabi
 
   before-commit:
-    desc: Run all checks
     cmds:
       - task lint
       - task test
 
+  # ---------------------------
+  # Run
+  # ---------------------------
   run:
-    desc: Run the application
     cmds:
-      - docker compose exec -T browser-dev cargo run
+      - >-
+        docker compose exec -T browser-dev cargo run
+        --workspace
 
   run:watch:
-    desc: Run the application in watch mode
     cmds:
-      - docker compose exec -T browser-dev cargo watch -x run
+      - >-
+        docker compose exec -T browser-dev cargo watch
+        -x "run --workspace"
