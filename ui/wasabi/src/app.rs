@@ -6,7 +6,6 @@ use alloc::string::String;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
 use noli::prelude::SystemApi;
-use noli::print;
 use noli::println;
 use noli::rect::Rect;
 use noli::sys::api::MouseEvent;
@@ -63,7 +62,7 @@ impl WasabiUI {
         }
     }
     fn handle_key_input(&mut self) -> Result<(), Error> {
-        print!("handle_key_input {:?}", self.input_mode);
+        println!("handle_key_input {:?}", self.input_mode);
         match self.input_mode {
             InputMode::Normal => {
                 let _ = Api::read_key();
