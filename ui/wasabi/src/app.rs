@@ -6,6 +6,7 @@ use alloc::string::String;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
 use noli::prelude::SystemApi;
+use noli::print;
 use noli::println;
 use noli::rect::Rect;
 use noli::sys::api::MouseEvent;
@@ -62,6 +63,7 @@ impl WasabiUI {
         }
     }
     fn handle_key_input(&mut self) -> Result<(), Error> {
+        print!("handle_key_input {:?}", self.input_mode);
         match self.input_mode {
             InputMode::Normal => {
                 let _ = Api::read_key();
@@ -158,12 +160,13 @@ impl WasabiUI {
                     position.y - WINDOW_INIT_Y_POS,
                 );
 
-                if relative_pos.0 >= 0
+                if relative_pos.0 < 0
                     || relative_pos.0 > WINDOW_WIDTH
                     || relative_pos.1 < 0
                     || relative_pos.1 > TOOLBAR_HEIGHT
                 {
-                    println!("button clicked OUTSIDE the window: {button:?} {position:?}");
+                    self.input_mode = InputMode::Editing;
+                    println!("button clicked OUTSIDE the window: {button:?} {position:?} {self.input_mode:?}");
                     return Ok(());
                 }
                 if relative_pos.1 < TOOLBAR_HEIGHT + TITLE_BAR_HEIGHT
@@ -172,7 +175,9 @@ impl WasabiUI {
                     self.clear_address_bar()?;
                     self.input_url = String::new();
                     self.input_mode = InputMode::Editing;
-                    println!("button clicked in toolbar: {button:?} {position:?}");
+                    println!(
+                        "button clicked in toolbar: {button:?} {position:?} {self.input_mode:?}"
+                    );
                     return Ok(());
                 }
                 self.input_mode = InputMode::Normal;
