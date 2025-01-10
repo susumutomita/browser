@@ -3,6 +3,7 @@ use crate::cursor::Cursor;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
+use core::borrow::Borrow;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
 use noli::prelude::SystemApi;
@@ -15,6 +16,8 @@ use noli::window::Window;
 use saba_core::browser::Browser;
 use saba_core::constants::ADDRESS_BAR_HEIGHT;
 use saba_core::constants::BLACK;
+use saba_core::constants::CONTENT_AREA_HEIGHT;
+use saba_core::constants::CONTENT_AREA_WIDTH;
 use saba_core::constants::DARK_GRAY;
 use saba_core::constants::GRAY;
 use saba_core::constants::LIGHT_GRAY;
@@ -26,6 +29,7 @@ use saba_core::constants::WINDOW_INIT_X_POS;
 use saba_core::constants::WINDOW_INIT_Y_POS;
 use saba_core::constants::WINDOW_WIDTH;
 use saba_core::error::Error;
+use saba_core::http::HttpResponse;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum InputMode {
@@ -61,7 +65,10 @@ impl WasabiUI {
             cursor: Cursor::new(),
         }
     }
-    fn handle_key_input(&mut self) -> Result<(), Error> {
+    fn handle_key_input(
+        &mut self,
+        handle_url: fn(String) -> Result<HttpResponse, Error>,
+    ) -> Result<(), Error> {
         println!("handle_key_input {:?}", self.input_mode);
         match self.input_mode {
             InputMode::Normal => {
@@ -69,7 +76,11 @@ impl WasabiUI {
             }
             InputMode::Editing => {
                 if let Some(c) = Api::read_key() {
-                    if c == 0x7F as char || c == 0x08 as char {
+                    if c == 0x0A as char {
+                        self.start_navigation(handle_url, self.input_url.clone());
+                        self.input_url = String::new();
+                        self.input_mode = InputMode::Normal;
+                    } else if c == 0x7F as char || c == 0x08 as char {
                         self.input_url.pop();
                         self.update_address_bar()?;
                     } else {
@@ -82,6 +93,45 @@ impl WasabiUI {
         Ok(())
     }
 
+    fn start_navigation(
+        &mut self,
+        handle_url: fn(String) -> Result<HttpResponse, Error>,
+        destination: String,
+    ) -> Result<(), Error> {
+        self.clear_content_area()?;
+
+        match handle_url(destination) {
+            Ok(response) => {
+                let page = self.browser.borrow().current_page();
+                page.borrow_mut().receive_response(response);
+            }
+            Err(e) => {
+                println!("failed to navigate: {:?}", e);
+                return Err(e);
+            }
+        }
+        Ok(())
+    }
+
+    fn clear_content_area(&mut self) -> Result<(), Error> {
+        if self
+            .window
+            .fill_rect(
+                WHITE,
+                0,
+                TOOLBAR_HEIGHT + 2,
+                CONTENT_AREA_WIDTH,
+                CONTENT_AREA_HEIGHT - 2,
+            )
+            .is_err()
+        {
+            return Err(Error::InvalidUI(
+                "failed to clear a content area".to_string(),
+            ));
+        }
+        self.window.flush();
+        Ok(())
+    }
     fn update_address_bar(&mut self) -> Result<(), Error> {
         if self
             .window
