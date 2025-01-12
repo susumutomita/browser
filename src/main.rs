@@ -33,7 +33,7 @@ fn handle_url(url: String) -> Result<HttpResponse, Error> {
     let response = match client.get(
         parsed_url.host(),
         parsed_url.port().parse::<u16>().expect(&format!(
-            "port number should be u16 but got {}",
+            "port number should be u16 but got {:?}",
             parsed_url.port()
         )),
         parsed_url.path(),
