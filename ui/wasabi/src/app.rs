@@ -255,7 +255,7 @@ impl WasabiUI {
     fn run_app(&mut self) -> Result<(), Error> {
         loop {
             self.handle_mouse_input()?;
-            self.handle_key_input()?;
+            self.handle_key_input(handle_url)?;
         }
     }
 
