@@ -3,7 +3,9 @@ use crate::cursor::Cursor;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
+#[allow(unused_imports)]
 use core::borrow::Borrow;
+use core::cell::Ref;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
 use noli::prelude::SystemApi;
@@ -77,7 +79,7 @@ impl WasabiUI {
             InputMode::Editing => {
                 if let Some(c) = Api::read_key() {
                     if c == 0x0A as char {
-                        self.start_navigation(handle_url, self.input_url.clone());
+                        self.start_navigation(handle_url, self.input_url.clone())?;
                         self.input_url = String::new();
                         self.input_mode = InputMode::Normal;
                     } else if c == 0x7F as char || c == 0x08 as char {
@@ -102,7 +104,10 @@ impl WasabiUI {
 
         match handle_url(destination) {
             Ok(response) => {
-                let page = self.browser.borrow().current_page();
+                // Borrow トレイトを使わず RefCell::borrow() を呼びたいので (*self.browser)
+                // を経由して RefCell にアクセスする
+                let browser_ref: Ref<Browser> = (*self.browser).borrow();
+                let page = browser_ref.current_page();
                 page.borrow_mut().receive_response(response);
             }
             Err(e) => {
@@ -215,7 +220,10 @@ impl WasabiUI {
                     || relative_pos.1 > TOOLBAR_HEIGHT
                 {
                     self.input_mode = InputMode::Editing;
-                    println!("button clicked OUTSIDE the window: {button:?} {position:?} {self.input_mode:?}");
+                    println!(
+                        "button clicked OUTSIDE the window: {button:?} {position:?} {0:?}",
+                        self.input_mode
+                    );
                     return Ok(());
                 }
                 if relative_pos.1 < TOOLBAR_HEIGHT + TITLE_BAR_HEIGHT
@@ -225,7 +233,8 @@ impl WasabiUI {
                     self.input_url = String::new();
                     self.input_mode = InputMode::Editing;
                     println!(
-                        "button clicked in toolbar: {button:?} {position:?} {self.input_mode:?}"
+                        "button clicked in toolbar: {button:?} {position:?} {0:?}",
+                        self.input_mode
                     );
                     return Ok(());
                 }
@@ -246,13 +255,19 @@ impl WasabiUI {
         Ok(())
     }
 
-    pub fn start(&mut self, handle_url: fn(String)) -> Result<(), Error> {
+    pub fn start(
+        &mut self,
+        handle_url: fn(String) -> Result<HttpResponse, Error>,
+    ) -> Result<(), Error> {
         self.setup()?;
         self.run_app(handle_url)?;
         Ok(())
     }
 
-    fn run_app(&mut self, handle_url: fn(String)) -> Result<(), Error> {
+    fn run_app(
+        &mut self,
+        handle_url: fn(String) -> Result<HttpResponse, Error>,
+    ) -> Result<(), Error> {
         loop {
             self.handle_mouse_input()?;
             self.handle_key_input(handle_url)?;

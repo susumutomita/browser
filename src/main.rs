@@ -78,7 +78,7 @@ fn main() {
     let browser = Browser::new();
 
     let ui = Rc::new(RefCell::new(WasabiUI::new(browser)));
-    match ui.borrow_mut().start() {
+    match ui.borrow_mut().start(handle_url) {
         Ok(_) => {}
         Err(e) => {
             println!("browser fails to start: {:?}", e);
