@@ -146,6 +146,14 @@ QEMU_ARGS+= -display cocoa
 endif
 ```
 
+If you rebuild entire wasabi then you need to un comment the line.
+
+```browser/Cargo.toml
+[features]
+default = ["wasabi"]
+wasabi = ["dep:net_wasabi", "dep:ui_wasabi", "dep:noli"]
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

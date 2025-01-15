@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use noli::bitmap::{self, bitmap_draw_rect};
 use noli::rect::Rect;
 use noli::sheet::Sheet;
