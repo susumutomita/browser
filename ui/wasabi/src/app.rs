@@ -115,6 +115,7 @@ impl WasabiUI {
                 return Err(e);
             }
         }
+        self.update_ui()?;
         Ok(())
     }
 
@@ -272,6 +273,21 @@ impl WasabiUI {
             self.handle_mouse_input()?;
             self.handle_key_input(handle_url)?;
         }
+    }
+
+    fn update_ui(&mut self) -> Result<(), Error> {
+        let display_items = self
+            .browser
+            .borrow()
+            .current_page()
+            .borrow()
+            .display_items();
+
+        for item in display_items {
+            println!("{:?}", item);
+        }
+
+        Ok(())
     }
 
     fn setup_toolbar(&mut self) -> OsResult<()> {
