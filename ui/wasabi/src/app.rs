@@ -3,8 +3,6 @@ use crate::cursor::Cursor;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
-#[allow(unused_imports)]
-use core::borrow::Borrow;
 use core::cell::Ref;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
