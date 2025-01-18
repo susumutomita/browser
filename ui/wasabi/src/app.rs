@@ -3,6 +3,7 @@ use crate::cursor::Cursor;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
+use core::alloc::Layout;
 use core::cell::Ref;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
@@ -27,7 +28,9 @@ use saba_core::constants::WHITE;
 use saba_core::constants::WINDOW_HEIGHT;
 use saba_core::constants::WINDOW_INIT_X_POS;
 use saba_core::constants::WINDOW_INIT_Y_POS;
+use saba_core::constants::WINDOW_PADDING;
 use saba_core::constants::WINDOW_WIDTH;
+use saba_core::display_item::DisplayItem;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
 use saba_core::renderer::layout::computed_style::FontSize;
@@ -283,8 +286,51 @@ impl WasabiUI {
             .display_items();
 
         for item in display_items {
-            println!("{:?}", item);
+            match item {
+                DisplayItem::Text {
+                    text,
+                    style,
+                    layout_point,
+                } => {
+                    if self
+                        .window
+                        .draw_string(
+                            style.color().code_u32(),
+                            layout_point.x() + WINDOW_PADDING,
+                            layout_point.y() + WINDOW_PADDING + TOOLBAR_HEIGHT,
+                            &text,
+                            convert_font_size(style.font_size()),
+                            style.text_decoration() == TextDecoration::Underline,
+                        )
+                        .is_err()
+                    {
+                        return Err(Error::InvalidUI("failed to draw a string".to_string()));
+                    }
+                }
+                DisplayItem::Rect {
+                    style,
+                    layout_point,
+                    layout_size,
+                } => {
+                    if self
+                        .window
+                        .fill_rect(
+                            style.background_color().code_u32(),
+                            layout_point.x() + WINDOW_PADDING,
+                            layout_point.y() + WINDOW_PADDING + TOOLBAR_HEIGHT,
+                            layout_size.width(),
+                            layout_size.height(),
+                        )
+                        .is_err()
+                    {
+                        return Err(Error::InvalidUI("failed to draw a string".to_string()));
+                    }
+                }
+                _ => {}
+            }
         }
+
+        self.window.flush();
 
         Ok(())
     }
