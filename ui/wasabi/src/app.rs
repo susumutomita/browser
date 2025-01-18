@@ -3,7 +3,6 @@ use crate::cursor::Cursor;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
-use core::alloc::Layout;
 use core::cell::Ref;
 use core::cell::RefCell;
 use noli::error::Result as OsResult;
@@ -34,6 +33,7 @@ use saba_core::display_item::DisplayItem;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
 use saba_core::renderer::layout::computed_style::FontSize;
+use saba_core::renderer::layout::computed_style::TextDecoration;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum InputMode {
