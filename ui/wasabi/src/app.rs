@@ -211,6 +211,7 @@ impl WasabiUI {
             self.cursor.flush();
 
             if button.l() || button.c() || button.r() {
+                println!("mouse clicked {:?}", button);
                 // 相対位置を計算する
                 let relative_pos = (
                     position.x - WINDOW_INIT_X_POS,
