@@ -1,43 +1,209 @@
+use crate::alloc::string::ToString;
 use crate::renderer::css::token::CssToken;
 use crate::renderer::css::token::CssTokenizer;
 use alloc::string::String;
-use alloc::string::ToString;
 use alloc::vec::Vec;
 use core::iter::Peekable;
-// e.g.
-// div {
-//   background-color: green;
-//   width: 100;
-// }
-// p {
-//   color: red;
-// }
-//
-// StyleSheet
-// |-- QualifiedRule
-//     |-- Selector
-//         |-- div
-//     |-- Vec<Declaration>
-//         |-- background-color: green
-//         |-- width: 100
-// |-- QualifiedRule
-//     |-- Selector
-//         |-- p
-//     |-- Vec<Declaration>
-//         |-- color: red
+
+#[derive(Debug, Clone)]
+pub struct CssParser {
+    t: Peekable<CssTokenizer>,
+}
+
+impl CssParser {
+    pub fn new(t: CssTokenizer) -> Self {
+        Self { t: t.peekable() }
+    }
+
+    /// https://www.w3.org/TR/css-syntax-3/#consume-component-value
+    fn consume_component_value(&mut self) -> ComponentValue {
+        self.t
+            .next()
+            .expect("should have a token in consume_component_value")
+    }
+
+    fn consume_ident(&mut self) -> String {
+        let token = match self.t.next() {
+            Some(t) => t,
+            None => panic!("should have a token but got None"),
+        };
+
+        match token {
+            CssToken::Ident(ref ident) => ident.to_string(),
+            _ => {
+                panic!("Parse error: {:?} is an unexpected token.", token);
+            }
+        }
+    }
+
+    /// https://www.w3.org/TR/css-syntax-3/#consume-a-declaration
+    fn consume_declaration(&mut self) -> Option<Declaration> {
+        if self.t.peek().is_none() {
+            return None;
+        }
+
+        // Declaration構造体を初期化する
+        let mut declaration = Declaration::new();
+        // Declaration構造体のプロパティに識別子を設定する
+        declaration.set_property(self.consume_ident());
+
+        // もし次のトークンがコロンでない場合、パースエラーなので、Noneを返す
+        match self.t.next() {
+            Some(token) => match token {
+                CssToken::Colon => {}
+                _ => return None,
+            },
+            None => return None,
+        }
+
+        // Declaration構造体の値にコンポーネント値を設定する
+        declaration.set_value(self.consume_component_value());
+
+        Some(declaration)
+    }
+
+    /// https://www.w3.org/TR/css-syntax-3/#consume-a-list-of-declarations
+    fn consume_list_of_declarations(&mut self) -> Vec<Declaration> {
+        let mut declarations = Vec::new();
+
+        loop {
+            let token = match self.t.peek() {
+                Some(t) => t,
+                None => return declarations,
+            };
+
+            match token {
+                CssToken::CloseCurly => {
+                    assert_eq!(self.t.next(), Some(CssToken::CloseCurly));
+                    return declarations;
+                }
+                CssToken::SemiColon => {
+                    assert_eq!(self.t.next(), Some(CssToken::SemiColon));
+                    // 一つの宣言が終了。何もしない
+                }
+                CssToken::Ident(ref _ident) => {
+                    if let Some(declaration) = self.consume_declaration() {
+                        declarations.push(declaration);
+                    }
+                }
+                _ => {
+                    self.t.next();
+                }
+            }
+        }
+    }
+
+    fn consume_selector(&mut self) -> Selector {
+        let token = match self.t.next() {
+            Some(t) => t,
+            None => panic!("should have a token but got None"),
+        };
+
+        match token {
+            CssToken::HashToken(value) => Selector::IdSelector(value[1..].to_string()),
+            CssToken::Delim(delim) => {
+                if delim == '.' {
+                    return Selector::ClassSelector(self.consume_ident());
+                }
+                panic!("Parse error: {:?} is an unexpected token.", token);
+            }
+            CssToken::Ident(ident) => {
+                // a:hoverのようなセレクタはタグ名のセレクタとして扱うため、
+                // もしコロン（:）が出てきた場合は宣言ブロックの開始直前まで
+                // トークンを進める
+                if self.t.peek() == Some(&CssToken::Colon) {
+                    while self.t.peek() != Some(&CssToken::OpenCurly) {
+                        self.t.next();
+                    }
+                }
+                Selector::TypeSelector(ident.to_string())
+            }
+            CssToken::AtKeyword(_keyword) => {
+                // @から始まるルールを無視するために、宣言ブロックの開始直前まで
+                // トークンを進める
+                while self.t.peek() != Some(&CssToken::OpenCurly) {
+                    self.t.next();
+                }
+                Selector::UnknownSelector
+            }
+            _ => {
+                self.t.next();
+                Selector::UnknownSelector
+            }
+        }
+    }
+
+    /// https://www.w3.org/TR/css-syntax-3/#consume-qualified-rule
+    /// https://www.w3.org/TR/css-syntax-3/#qualified-rule
+    /// https://www.w3.org/TR/css-syntax-3/#style-rules
+    fn consume_qualified_rule(&mut self) -> Option<QualifiedRule> {
+        let mut rule = QualifiedRule::new();
+
+        loop {
+            let token = match self.t.peek() {
+                Some(t) => t,
+                None => return None,
+            };
+
+            match token {
+                CssToken::OpenCurly => {
+                    assert_eq!(self.t.next(), Some(CssToken::OpenCurly));
+                    rule.set_declarations(self.consume_list_of_declarations());
+                    return Some(rule);
+                }
+                _ => {
+                    rule.set_selector(self.consume_selector());
+                }
+            }
+        }
+    }
+
+    /// https://www.w3.org/TR/css-syntax-3/#consume-a-list-of-rules
+    fn consume_list_of_rules(&mut self) -> Vec<QualifiedRule> {
+        // 空のベクタを作成する
+        let mut rules = Vec::new();
+
+        loop {
+            let token = match self.t.peek() {
+                Some(t) => t,
+                None => return rules,
+            };
+            match token {
+                // AtKeywordトークンが出てきた場合、他のCSSをインポートする@import、
+                // メディアクエリを表す@mediaなどのルールが始まることを表す
+                CssToken::AtKeyword(_keyword) => {
+                    let _rule = self.consume_qualified_rule();
+                    // しかし、本書のブラウザでは@から始まるルールはサポート
+                    // しないので、無視をする
+                }
+                _ => {
+                    // 1つのルールを解釈し、ベクタに追加する
+                    let rule = self.consume_qualified_rule();
+                    match rule {
+                        Some(r) => rules.push(r),
+                        None => return rules,
+                    }
+                }
+            }
+        }
+    }
+
+    /// https://www.w3.org/TR/css-syntax-3/#parse-stylesheet
+    pub fn parse_stylesheet(&mut self) -> StyleSheet {
+        // StyleSheet構造体のインスタンスを作成する
+        let mut sheet = StyleSheet::new();
+
+        // トークン列からルールのリストを作成し、StyleSheetのフィールドに設定する
+        sheet.set_rules(self.consume_list_of_rules());
+        sheet
+    }
+}
 
 /// https://www.w3.org/TR/cssom-1/#cssstylesheet
-/// https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleRule
 #[derive(Debug, Clone, PartialEq)]
 pub struct StyleSheet {
     /// https://drafts.csswg.org/cssom/#dom-cssstylesheet-cssrules
     pub rules: Vec<QualifiedRule>,
-}
-
-impl Default for StyleSheet {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl StyleSheet {
@@ -50,50 +216,15 @@ impl StyleSheet {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-// TODO: implement it properly
-pub struct AtRule {
-    // TODO: support list of media query
-    /// https://www.w3.org/TR/mediaqueries-5/#typedef-media-query-list
-    pub prelude: String,
-    pub rule: QualifiedRule,
-}
-
-impl Default for AtRule {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-// TODO: support list of media query
-impl AtRule {
-    pub fn new() -> Self {
-        Self {
-            prelude: String::new(),
-            rule: QualifiedRule::new(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
 /// https://www.w3.org/TR/css-syntax-3/#qualified-rule
-/// https://www.w3.org/TR/css-syntax-3/#style-rules
-/// https://www.w3.org/TR/cssom-1/#cssstylerule
-/// https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleRule
+#[derive(Debug, Clone, PartialEq)]
 pub struct QualifiedRule {
-    // TODO: support multiple selectors
     /// https://www.w3.org/TR/selectors-4/#typedef-selector-list
     /// The prelude of the qualified rule is parsed as a <selector-list>.
     pub selector: Selector,
     /// https://www.w3.org/TR/css-syntax-3/#parse-a-list-of-declarations
     /// The content of the qualified rule’s block is parsed as a list of declarations.
     pub declarations: Vec<Declaration>,
-}
-
-impl Default for QualifiedRule {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl QualifiedRule {
@@ -122,23 +253,15 @@ pub enum Selector {
     ClassSelector(String),
     /// https://www.w3.org/TR/selectors-4/#id-selectors
     IdSelector(String),
-    /// This is an unofficial selector.
+    /// パース中にエラーが起こったときに使用されるセレクタ
     UnknownSelector,
 }
 
-#[derive(Debug, Clone, PartialEq)]
 /// https://www.w3.org/TR/css-syntax-3/#declaration
-/// https://www.w3.org/TR/cssom-1/#the-cssstyledeclaration-interface
-/// https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration
+#[derive(Debug, Clone, PartialEq)]
 pub struct Declaration {
     pub property: String,
     pub value: ComponentValue,
-}
-
-impl Default for Declaration {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl Declaration {
@@ -158,240 +281,7 @@ impl Declaration {
     }
 }
 
-/// https://www.w3.org/TR/css-syntax-3/#component-value
-/// https://www.w3.org/TR/css-values-4/#component-types
 pub type ComponentValue = CssToken;
-
-#[derive(Debug, Clone)]
-pub struct CssParser {
-    t: Peekable<CssTokenizer>,
-}
-
-impl CssParser {
-    pub fn new(t: CssTokenizer) -> Self {
-        Self { t: t.peekable() }
-    }
-
-    fn consume_ident(&mut self) -> String {
-        let token = match self.t.next() {
-            Some(t) => t,
-            None => panic!("should have a token but got None"),
-        };
-
-        match token {
-            CssToken::Ident(ref ident) => ident.to_string(),
-            _ => {
-                panic!("Parse error: {:?} is an unexpected token.", token);
-            }
-        }
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#consume-component-value
-    fn consume_component_value(&mut self) -> ComponentValue {
-        self.t
-            .next()
-            .expect("should have a token in consume_component_value")
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#qualified-rule
-    /// Note: Most qualified rules will be style rules, where the prelude is a selector [SELECT]
-    /// and the block a list of declarations.
-    fn consume_selector(&mut self) -> Selector {
-        let token = match self.t.next() {
-            Some(t) => t,
-            None => panic!("should have a token but got None"),
-        };
-
-        match token {
-            // TODO: support tag.class and tag#id
-            CssToken::HashToken(value) => Selector::IdSelector(value[1..].to_string()),
-            CssToken::Delim(delim) => {
-                if delim == '.' {
-                    return Selector::ClassSelector(self.consume_ident());
-                }
-                panic!("Parse error: {:?} is an unexpected token.", token);
-            }
-            CssToken::Ident(ident) => {
-                // TODO: fix this. Skip pseudo-classes such as :link and :visited
-                if self.t.peek() == Some(&CssToken::Colon) {
-                    while self.t.peek() != Some(&CssToken::OpenCurly) {
-                        self.t.next();
-                    }
-                }
-                Selector::TypeSelector(ident.to_string())
-            }
-            CssToken::AtKeyword(_keyword) => {
-                // skip until "{" comes
-                while self.t.peek() != Some(&CssToken::OpenCurly) {
-                    self.t.next();
-                }
-                Selector::UnknownSelector
-            }
-            _ => {
-                self.t.next();
-                Selector::UnknownSelector
-            }
-        }
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#consume-a-declaration
-    fn consume_declaration(&mut self) -> Option<Declaration> {
-        // Create a new declaration with its name set to the value of the current input token.
-        let mut declaration = Declaration::new();
-        declaration.set_property(self.consume_ident());
-
-        // "2. If the next input token is anything other than a <colon-token>, this is a parse error.
-        // Return nothing. Otherwise, consume the next input token."
-        match self.t.next() {
-            Some(CssToken::Colon) => {}
-            _ => return None,
-        }
-
-        // "3. While the next input token is a <whitespace-token>, consume the next input token."
-
-        // "4. As long as the next input token is anything other than an <EOF-token>, consume a
-        // component value and append it to the declaration’s value."
-        // TODO: support multiple values in one declaration.
-        declaration.set_value(self.consume_component_value());
-
-        Some(declaration)
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#consume-simple-block
-    /// https://www.w3.org/TR/css-syntax-3/#consume-a-list-of-declarations
-    /// Note: Most qualified rules will be style rules, where the prelude is a selector [SELECT] and
-    /// the block a list of declarations.
-    fn consume_list_of_declarations(&mut self) -> Vec<Declaration> {
-        let mut declarations = Vec::new();
-
-        loop {
-            let token = match self.t.peek() {
-                Some(t) => t,
-                None => return declarations,
-            };
-
-            match token {
-                CssToken::CloseCurly => {
-                    // https://www.w3.org/TR/css-syntax-3/#ending-token
-                    assert_eq!(self.t.next(), Some(CssToken::CloseCurly));
-                    return declarations;
-                }
-                CssToken::SemiColon => {
-                    assert_eq!(self.t.next(), Some(CssToken::SemiColon));
-                    // Do nothing.
-                }
-                CssToken::Ident(ref _ident) => {
-                    if let Some(declaration) = self.consume_declaration() {
-                        declarations.push(declaration);
-                    }
-                }
-                _ => {
-                    self.t.next();
-                }
-            }
-        }
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#consume-at-rule
-    fn consume_at_rule(&mut self) -> Option<AtRule> {
-        let rule = AtRule::new();
-
-        loop {
-            let token = self.t.next()?;
-
-            match token {
-                CssToken::OpenCurly => {
-                    //TODO: set rule to AtRule.
-                    let _qualified_rule = self.consume_qualified_rule();
-                    // consume the close curly for a AtRule block
-                    assert_eq!(self.t.next(), Some(CssToken::CloseCurly));
-                    return Some(rule);
-                }
-                _ => {
-                    // TODO: set prelude to AtRule
-                }
-            }
-        }
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#consume-qualified-rule
-    /// https://www.w3.org/TR/css-syntax-3/#qualified-rule
-    /// https://www.w3.org/TR/css-syntax-3/#style-rules
-    fn consume_qualified_rule(&mut self) -> Option<QualifiedRule> {
-        let mut rule = QualifiedRule::new();
-
-        loop {
-            let token = self.t.peek()?;
-
-            match token {
-                CssToken::OpenCurly => {
-                    // "Consume a simple block and assign it to the qualified rule’s block. Return
-                    // the qualified rule."
-
-                    // The content of the qualified rule’s block is parsed as a list of
-                    // declarations.
-                    assert_eq!(self.t.next(), Some(CssToken::OpenCurly));
-                    rule.set_declarations(self.consume_list_of_declarations());
-                    return Some(rule);
-                }
-                _ => {
-                    // "Reconsume the current input token. Consume a component value. Append the
-                    // returned value to the qualified rule’s prelude."
-
-                    // The prelude of the qualified rule is parsed as a <selector-list>.
-                    // https://www.w3.org/TR/css-syntax-3/#css-parse-something-according-to-a-css-grammar
-                    rule.set_selector(self.consume_selector());
-                }
-            }
-        }
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#consume-a-list-of-rules
-    fn consume_list_of_rules(&mut self) -> Vec<QualifiedRule> {
-        // "Create an initially empty list of rules."
-        let mut rules = Vec::new();
-
-        loop {
-            let token = match self.t.peek() {
-                Some(t) => t,
-                None => return rules,
-            };
-            match token {
-                // <at-keyword-token>
-                // "Reconsume the current input token. Consume an at-rule, and append the returned value
-                // to the list of rules."
-                CssToken::AtKeyword(_keyword) => {
-                    let _rule = self.consume_at_rule();
-                    // TODO: we ignore media query for now. implement it properly.
-                }
-                _ => {
-                    // anything else
-                    // "Reconsume the current input token. Consume a qualified rule. If anything is
-                    // returned, append it to the list of rules."
-                    let rule = self.consume_qualified_rule();
-                    match rule {
-                        Some(r) => rules.push(r),
-                        None => return rules,
-                    }
-                }
-            }
-        }
-    }
-
-    /// https://www.w3.org/TR/css-syntax-3/#parse-stylesheet
-    pub fn parse_stylesheet(&mut self) -> StyleSheet {
-        // 1. Create a new stylesheet.
-        let mut sheet = StyleSheet::new();
-
-        // 2. Consume a list of rules from the stream of tokens, with the top-level flag set. Let
-        // the return value be rules.
-        // 3. Assign rules to the stylesheet’s value.
-        sheet.set_rules(self.consume_list_of_rules());
-
-        // 4. Return the stylesheet.
-        sheet
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -413,9 +303,9 @@ mod tests {
         let t = CssTokenizer::new(style);
         let cssom = CssParser::new(t).parse_stylesheet();
 
-        let mut rule = QualifiedRule::default();
+        let mut rule = QualifiedRule::new();
         rule.set_selector(Selector::TypeSelector("p".to_string()));
-        let mut declaration = Declaration::default();
+        let mut declaration = Declaration::new();
         declaration.set_property("color".to_string());
         declaration.set_value(ComponentValue::Ident("red".to_string()));
         rule.set_declarations(vec![declaration]);
@@ -436,9 +326,9 @@ mod tests {
         let t = CssTokenizer::new(style);
         let cssom = CssParser::new(t).parse_stylesheet();
 
-        let mut rule = QualifiedRule::default();
+        let mut rule = QualifiedRule::new();
         rule.set_selector(Selector::IdSelector("id".to_string()));
-        let mut declaration = Declaration::default();
+        let mut declaration = Declaration::new();
         declaration.set_property("color".to_string());
         declaration.set_value(ComponentValue::Ident("red".to_string()));
         rule.set_declarations(vec![declaration]);
@@ -459,9 +349,9 @@ mod tests {
         let t = CssTokenizer::new(style);
         let cssom = CssParser::new(t).parse_stylesheet();
 
-        let mut rule = QualifiedRule::default();
+        let mut rule = QualifiedRule::new();
         rule.set_selector(Selector::ClassSelector("class".to_string()));
-        let mut declaration = Declaration::default();
+        let mut declaration = Declaration::new();
         declaration.set_property("color".to_string());
         declaration.set_value(ComponentValue::Ident("red".to_string()));
         rule.set_declarations(vec![declaration]);
@@ -482,19 +372,19 @@ mod tests {
         let t = CssTokenizer::new(style);
         let cssom = CssParser::new(t).parse_stylesheet();
 
-        let mut rule1 = QualifiedRule::default();
+        let mut rule1 = QualifiedRule::new();
         rule1.set_selector(Selector::TypeSelector("p".to_string()));
-        let mut declaration1 = Declaration::default();
+        let mut declaration1 = Declaration::new();
         declaration1.set_property("content".to_string());
         declaration1.set_value(ComponentValue::StringToken("Hey".to_string()));
         rule1.set_declarations(vec![declaration1]);
 
-        let mut rule2 = QualifiedRule::default();
+        let mut rule2 = QualifiedRule::new();
         rule2.set_selector(Selector::TypeSelector("h1".to_string()));
-        let mut declaration2 = Declaration::default();
+        let mut declaration2 = Declaration::new();
         declaration2.set_property("font-size".to_string());
         declaration2.set_value(ComponentValue::Number(40.0));
-        let mut declaration3 = Declaration::default();
+        let mut declaration3 = Declaration::new();
         declaration3.set_property("color".to_string());
         declaration3.set_value(ComponentValue::Ident("blue".to_string()));
         rule2.set_declarations(vec![declaration2, declaration3]);
