@@ -73,7 +73,6 @@ impl WasabiUI {
         &mut self,
         handle_url: fn(String) -> Result<HttpResponse, Error>,
     ) -> Result<(), Error> {
-        println!("handle_key_input {:?}", self.input_mode);
         match self.input_mode {
             InputMode::Normal => {
                 let _ = Api::read_key();

@@ -1,18 +1,18 @@
-#[allow(unused_imports)]
-use noli::bitmap::{self, bitmap_draw_rect};
+use noli::bitmap::bitmap_draw_rect;
 use noli::rect::Rect;
 use noli::sheet::Sheet;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Cursor {
-    pub sheet: Sheet,
+    sheet: Sheet,
 }
 
 impl Cursor {
     pub fn new() -> Self {
         let mut sheet = Sheet::new(Rect::new(0, 0, 10, 10).unwrap());
         let bitmap = sheet.bitmap();
-        bitmap_draw_rect(bitmap, 0xFF0000, 0, 0, 10, 10).expect("failed to draw a cursor");
+        bitmap_draw_rect(bitmap, 0xff0000, 0, 0, 10, 10).expect("failed to draw a cursor");
+
         Self { sheet }
     }
 
@@ -24,7 +24,7 @@ impl Cursor {
         self.sheet.set_position(x, y);
     }
 
-    pub fn flush(&self) {
-        self.sheet.flush_area(self.rect());
+    pub fn flush(&mut self) {
+        self.sheet.flush();
     }
 }
