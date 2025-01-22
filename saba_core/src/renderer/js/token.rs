@@ -23,6 +23,7 @@ pub struct JsLexer {
     input: Vec<char>,
 }
 
+#[allow(clippy::needless_return)]
 impl JsLexer {
     pub fn new(js: String) -> Self {
         Self {
