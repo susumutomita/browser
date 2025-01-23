@@ -1,8 +1,8 @@
-// todo
 use crate::renderer::js::token::JsLexer;
 use crate::renderer::js::token::Token;
 use alloc::rc::Rc;
 use alloc::string::String;
+use alloc::vec;
 use alloc::vec::Vec;
 use core::iter::Peekable;
 
@@ -152,20 +152,26 @@ impl Program {
     }
 }
 
+impl Default for Program {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct JsParser {
     t: Peekable<JsLexer>,
 }
 
+#[allow(clippy::single_match)]
+#[allow(clippy::redundant_guards)]
 impl JsParser {
     pub fn new(t: JsLexer) -> Self {
         Self { t: t.peekable() }
     }
 
     fn primary_expression(&mut self) -> Option<Rc<Node>> {
-        let t = match self.t.next() {
-            Some(token) => token,
-            None => return None,
-        };
+        // Clippy: replace match with ?
+        let t = self.t.next()?;
 
         match t {
             Token::Identifier(value) => Node::new_identifier(value),
@@ -178,20 +184,17 @@ impl JsParser {
     fn member_expression(&mut self) -> Option<Rc<Node>> {
         let expr = self.primary_expression();
 
+        // Clippy: replace match with ?
         let t = match self.t.peek() {
             Some(token) => token,
             None => return expr,
         };
 
         match t {
-            Token::Punctuator(c) => {
-                if c == &'.' {
-                    // '.'を消費する
-                    assert!(self.t.next().is_some());
-                    return Node::new_member_expression(expr, self.identifier());
-                }
-
-                expr
+            Token::Punctuator(c) if c == &'.' => {
+                // '.'を消費する
+                let _ = self.t.next()?;
+                Node::new_member_expression(expr, self.identifier())
             }
             _ => expr,
         }
@@ -201,23 +204,22 @@ impl JsParser {
         let mut arguments = Vec::new();
 
         loop {
-            // ')'に到達するまで、解釈した値を`arguments`ベクタに追加する
             match self.t.peek() {
-                Some(t) => match t {
-                    Token::Punctuator(c) => {
-                        if c == &')' {
-                            // ')'を消費する
-                            assert!(self.t.next().is_some());
-                            return arguments;
-                        }
-                        if c == &',' {
-                            // ','を消費する
-                            assert!(self.t.next().is_some());
-                        }
-                    }
-                    _ => arguments.push(self.assignment_expression()),
-                },
-                None => return arguments,
+                Some(Token::Punctuator(c)) if c == &')' => {
+                    // ')'を消費
+                    let _ = self.t.next();
+                    return arguments;
+                }
+                Some(Token::Punctuator(c)) if c == &',' => {
+                    // ','を消費
+                    let _ = self.t.next();
+                }
+                Some(_) => {
+                    arguments.push(self.assignment_expression());
+                }
+                None => {
+                    return arguments;
+                }
             }
         }
     }
@@ -225,21 +227,12 @@ impl JsParser {
     fn left_hand_side_expression(&mut self) -> Option<Rc<Node>> {
         let expr = self.member_expression();
 
-        let t = match self.t.peek() {
-            Some(token) => token,
-            None => return expr,
-        };
-
-        match t {
-            Token::Punctuator(c) => {
-                if c == &'(' {
-                    // '('を消費する
-                    assert!(self.t.next().is_some());
-                    // 関数呼び出しのため、CallExpressionノードを返す
-                    return Node::new_call_expression(expr, self.arguments());
-                }
-
-                expr
+        match self.t.peek() {
+            Some(Token::Punctuator(c)) if c == &'(' => {
+                // '('を消費
+                let _ = self.t.next()?;
+                // 関数呼び出しとして CallExpression ノードへ
+                Node::new_call_expression(expr, self.arguments())
             }
             _ => expr,
         }
@@ -254,14 +247,11 @@ impl JsParser {
         };
 
         match t {
-            Token::Punctuator(c) => match c {
-                '+' | '-' => {
-                    // '+'または'-'の記号を消費する
-                    assert!(self.t.next().is_some());
-                    Node::new_additive_expression(c, left, self.assignment_expression())
-                }
-                _ => left,
-            },
+            Token::Punctuator(c @ ('+' | '-')) => {
+                // '+' または '-' を消費
+                let _ = self.t.next()?;
+                Node::new_additive_expression(c, left, self.assignment_expression())
+            }
             _ => left,
         }
     }
@@ -269,15 +259,10 @@ impl JsParser {
     fn assignment_expression(&mut self) -> Option<Rc<Node>> {
         let expr = self.additive_expression();
 
-        let t = match self.t.peek() {
-            Some(token) => token,
-            None => return expr,
-        };
-
-        match t {
-            Token::Punctuator('=') => {
-                // '='を消費する
-                assert!(self.t.next().is_some());
+        match self.t.peek() {
+            Some(Token::Punctuator('=')) => {
+                // '='を消費
+                let _ = self.t.next()?;
                 Node::new_assignment_expression('=', expr, self.assignment_expression())
             }
             _ => expr,
@@ -285,25 +270,19 @@ impl JsParser {
     }
 
     fn initialiser(&mut self) -> Option<Rc<Node>> {
-        let t = match self.t.next() {
-            Some(token) => token,
-            None => return None,
-        };
+        // Clippy: replace match with ?
+        let t = self.t.next()?;
 
+        // collapsible_match → Token::Punctuator('=') / Token::Punctuator(_)
         match t {
-            Token::Punctuator(c) => match c {
-                '=' => self.assignment_expression(),
-                _ => None,
-            },
+            Token::Punctuator('=') => self.assignment_expression(),
+            Token::Punctuator(_) => None,
             _ => None,
         }
     }
 
     fn identifier(&mut self) -> Option<Rc<Node>> {
-        let t = match self.t.next() {
-            Some(token) => token,
-            None => return None,
-        };
+        let t = self.t.next()?;
 
         match t {
             Token::Identifier(name) => Node::new_identifier(name),
@@ -313,44 +292,34 @@ impl JsParser {
 
     fn variable_declaration(&mut self) -> Option<Rc<Node>> {
         let ident = self.identifier();
-
         let declarator = Node::new_variable_declarator(ident, self.initialiser());
 
-        let mut declarations = Vec::new();
-        declarations.push(declarator);
+        // Clippy: use vec![...] instead of creating then push
+        let declarations = vec![declarator];
 
         Node::new_variable_declaration(declarations)
     }
 
     fn statement(&mut self) -> Option<Rc<Node>> {
-        let t = match self.t.peek() {
-            Some(t) => t,
-            None => return None,
-        };
+        // Clippy: replace match with ?
+        let t = self.t.peek()?;
 
         let node = match t {
-            Token::Keyword(keyword) => {
-                if keyword == "var" {
-                    // "var"の予約語を消費する
-                    assert!(self.t.next().is_some());
-
-                    self.variable_declaration()
-                } else if keyword == "return" {
-                    // "return"の予約語を消費する
-                    assert!(self.t.next().is_some());
-
-                    Node::new_return_statement(self.assignment_expression())
-                } else {
-                    None
-                }
+            Token::Keyword(keyword) if keyword == "var" => {
+                let _ = self.t.next()?; // "var" 消費
+                self.variable_declaration()
+            }
+            Token::Keyword(keyword) if keyword == "return" => {
+                let _ = self.t.next()?; // "return" 消費
+                Node::new_return_statement(self.assignment_expression())
             }
             _ => Node::new_expression_statement(self.assignment_expression()),
         };
 
+        // セミコロンがあれば消費
         if let Some(Token::Punctuator(c)) = self.t.peek() {
-            // ';'を消費する
             if c == &';' {
-                assert!(self.t.next().is_some());
+                let _ = self.t.next();
             }
         }
 
@@ -358,68 +327,72 @@ impl JsParser {
     }
 
     fn function_body(&mut self) -> Option<Rc<Node>> {
-        // '{'を消費する
-        match self.t.next() {
-            Some(t) => match t {
-                Token::Punctuator(c) => assert!(c == '{'),
-                _ => unimplemented!("function should have open curly blacket but got {:?}", t),
-            },
-            None => unimplemented!("function should have open curly blacket but got None"),
+        // '{' を消費
+        let open_brace = self.t.next()?;
+        match open_brace {
+            Token::Punctuator(c) if c == '{' => {}
+            _ => unimplemented!(
+                "function should have open curly bracket but got {:?}",
+                open_brace
+            ),
         }
 
         let mut body = Vec::new();
         loop {
-            // '}'に到達するまで、関数内のコードとして解釈する
             match self.t.peek() {
-                Some(t) => match t {
-                    Token::Punctuator(c) => {
-                        if c == &'}' {
-                            // '}'を消費し、BlockStatementノードを返す
-                            assert!(self.t.next().is_some());
-                            return Node::new_block_statement(body);
-                        }
-                    }
-                    _ => {}
-                },
-                None => {}
+                Some(Token::Punctuator(c)) if c == &'}' => {
+                    // '}'を消費してBlockStatementを返す
+                    let _ = self.t.next();
+                    return Node::new_block_statement(body);
+                }
+                Some(_) => {
+                    body.push(self.source_element());
+                }
+                None => {
+                    // 実装の都合上 None でも抜ける
+                    return Node::new_block_statement(body);
+                }
             }
-
-            body.push(self.source_element());
         }
     }
 
     fn parameter_list(&mut self) -> Vec<Option<Rc<Node>>> {
         let mut params = Vec::new();
 
-        // '('を消費する。もし次のトークンが'('でない場合、エラーになる
-        match self.t.next() {
-            Some(t) => match t {
-                Token::Punctuator(c) => assert!(c == '('),
-                _ => unimplemented!("function should have `(` but got {:?}", t),
-            },
-            None => unimplemented!("function should have `(` but got None"),
+        // '(' を取得
+        // None ならパラメータ一覧が始まらなかったとみなして空のまま返す
+        let open_paren = match self.t.next() {
+            Some(tok) => tok,
+            None => {
+                // 必要に応じてここで panic! する or 空を返すなど
+                return params;
+            }
+        };
+
+        match open_paren {
+            Token::Punctuator('(') => {
+                // OK: 関数のパラメータリスト開始
+            }
+            _ => {
+                unimplemented!("function should have '(' but got {:?}", open_paren);
+            }
         }
 
         loop {
-            // ')'に到達するまで、paramsに仮引数となる変数を追加する
             match self.t.peek() {
-                Some(t) => match t {
-                    Token::Punctuator(c) => {
-                        if c == &')' {
-                            // ')'を消費する
-                            assert!(self.t.next().is_some());
-                            return params;
-                        }
-                        if c == &',' {
-                            // ','を消費する
-                            assert!(self.t.next().is_some());
-                        }
-                    }
-                    _ => {
-                        params.push(self.identifier());
-                    }
-                },
-                None => return params,
+                Some(Token::Punctuator(c)) if c == &')' => {
+                    let _ = self.t.next(); // ')' を消費
+                    return params;
+                }
+                Some(Token::Punctuator(c)) if c == &',' => {
+                    let _ = self.t.next(); // ',' を消費
+                }
+                Some(_) => {
+                    params.push(self.identifier());
+                }
+                None => {
+                    return params;
+                }
             }
         }
     }
@@ -431,34 +404,25 @@ impl JsParser {
     }
 
     fn source_element(&mut self) -> Option<Rc<Node>> {
-        let t = match self.t.peek() {
-            Some(t) => t,
-            None => return None,
-        };
+        // Clippy: replace match with ?
+        let t = self.t.peek()?;
 
-        match t {
-            Token::Keyword(keyword) => {
-                if keyword == "function" {
-                    // "function"キーワードを消費する
-                    assert!(self.t.next().is_some());
-                    self.function_declaration()
-                } else {
-                    self.statement()
-                }
+        if let Token::Keyword(keyword) = t {
+            if keyword == "function" {
+                let _ = self.t.next()?; // "function" 消費
+                return self.function_declaration();
             }
-            _ => self.statement(),
         }
+        // それ以外は statement
+        self.statement()
     }
 
     pub fn parse_ast(&mut self) -> Program {
         let mut program = Program::new();
-
         let mut body = Vec::new();
 
         loop {
-            let node = self.source_element();
-
-            match node {
+            match self.source_element() {
                 Some(n) => body.push(n),
                 None => {
                     program.set_body(body);
