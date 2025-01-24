@@ -6,3 +6,9 @@ impl JsRuntime {
         Self {}
     }
 }
+
+impl Default for JsRuntime {
+    fn default() -> Self {
+        Self::new()
+    }
+}
