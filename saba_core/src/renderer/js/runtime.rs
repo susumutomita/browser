@@ -2,8 +2,8 @@ use crate::renderer::js::ast::Node;
 use crate::renderer::js::ast::Program;
 use alloc::rc::Rc;
 use core::borrow::Borrow;
-use core::ops::Add;
-use core::ops::Sub;
+use core::ops::{Add, Sub};
+
 #[derive(Debug, Clone)]
 pub struct JsRuntime {}
 
@@ -16,7 +16,8 @@ impl Add<RuntimeValue> for RuntimeValue {
     type Output = RuntimeValue;
     fn add(self, rhs: RuntimeValue) -> RuntimeValue {
         let (RuntimeValue::Number(left_num), RuntimeValue::Number(right_num)) = (self, rhs);
-        return RuntimeValue::Number(left_num + right_num);
+        // 不要な return を削除
+        RuntimeValue::Number(left_num + right_num)
     }
 }
 
@@ -24,41 +25,40 @@ impl Sub<RuntimeValue> for RuntimeValue {
     type Output = RuntimeValue;
     fn sub(self, rhs: RuntimeValue) -> RuntimeValue {
         let (RuntimeValue::Number(left_num), RuntimeValue::Number(right_num)) = (self, rhs);
-        return RuntimeValue::Number(left_num - right_num);
+        RuntimeValue::Number(left_num - right_num)
     }
 }
+
 impl JsRuntime {
     pub fn new() -> Self {
         Self {}
     }
+
     pub fn execute(&mut self, program: &Program) {
         for node in program.body() {
+            // node を clone して Some(...) で包む
             self.eval(&Some(node.clone()));
         }
     }
 
+    // 再帰専用の引数に対する警告を抑制したい場合は、関数定義に以下のアトリビュートを付与:
+    #[allow(clippy::only_used_in_recursion)]
     fn eval(&mut self, node: &Option<Rc<Node>>) -> Option<RuntimeValue> {
-        let node = match node {
-            Some(n) => n,
-            None => return None,
-        };
+        // `match Some(n) => n, None => return None` を `?` にする
+        let node = node.as_ref()?;
 
         match node.borrow() {
-            Node::ExpressionStatement(expr) => return self.eval(&expr),
+            // 不要な return を削除 & 不要な借用を削除
+            Node::ExpressionStatement(expr) => self.eval(expr),
+
             Node::AdditiveExpression {
                 operator,
                 left,
                 right,
             } => {
-                let left_value = match self.eval(&left) {
-                    Some(value) => value,
-                    None => return None,
-                };
-                let right_value = match self.eval(&right) {
-                    Some(value) => value,
-                    None => return None,
-                };
-
+                // match ... { Some(value)=> value, None => return None } を ? 演算子に
+                let left_value = self.eval(left)?;
+                let right_value = self.eval(right)?;
                 if operator == &'+' {
                     Some(left_value + right_value)
                 } else if operator == &'-' {
@@ -67,16 +67,12 @@ impl JsRuntime {
                     None
                 }
             }
-            Node::AssignmentExpression {
-                operator: _,
-                left: _,
-                right: _,
-            } => None,
-            Node::MemberExpression {
-                object: _,
-                property: _,
-            } => None,
+
+            Node::AssignmentExpression { .. } => None,
+            Node::MemberExpression { .. } => None,
             Node::NumericLiteral(value) => Some(RuntimeValue::Number(*value)),
+
+            // 上記で扱っていないバリアントをまとめて無視するならこう書く：
             _ => None,
         }
     }
