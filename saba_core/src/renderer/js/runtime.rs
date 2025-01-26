@@ -1,11 +1,47 @@
 use crate::renderer::js::ast::Node;
 use crate::renderer::js::ast::Program;
 use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::vec::Vec;
 use core::borrow::Borrow;
+use core::cell::RefCell;
 use core::ops::{Add, Sub};
 
+type VariableMap = Vec<(String, Option<RuntimeValue>)>;
+
+/// https://262.ecma-international.org/#sec-environment-records
 #[derive(Debug, Clone)]
-pub struct JsRuntime {}
+pub struct Environment {
+    variables: VariableMap,
+    outer: Option<Rc<RefCell<Environment>>>,
+}
+
+impl Environment {
+    fn new(outer: Option<Rc<RefCell<Environment>>>) -> Self {
+        Self {
+            variables: VariableMap::new(),
+            outer,
+        }
+    }
+    pub fn get_variable(&self, name: String) -> Option<RuntimeValue> {
+        for variable in &self.variables {
+            if variable.0 == name {
+                return variable.1.clone(); // (d1)
+            }
+        }
+        if let Some(env) = &self.outer {
+            env.borrow_mut().get_variable(name) // (d2)
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+#[warn(dead_code)]
+pub struct JsRuntime {
+    env: Rc<RefCell<Environment>>,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RuntimeValue {
@@ -31,7 +67,9 @@ impl Sub<RuntimeValue> for RuntimeValue {
 
 impl JsRuntime {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            env: Rc::new(RefCell::new(Environment::new(None))),
+        }
     }
 
     pub fn execute(&mut self, program: &Program) {
