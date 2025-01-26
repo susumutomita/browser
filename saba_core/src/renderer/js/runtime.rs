@@ -38,7 +38,7 @@ impl Environment {
 }
 
 #[derive(Debug, Clone)]
-#[warn(dead_code)]
+#[allow(dead_code)]
 pub struct JsRuntime {
     env: Rc<RefCell<Environment>>,
 }
