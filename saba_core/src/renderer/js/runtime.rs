@@ -153,7 +153,7 @@ impl JsRuntime {
     /// (bool, Option<RuntimeValue>) のタプルを返す
     ///   bool: ブラウザAPIが呼ばれたかどうか。trueなら何かしらのAPIが呼ばれたことを示す
     ///   Option<RuntimeValue>: ブラウザAPIの呼び出しによって得られた結果
-    #[warn(dead_code)]
+    #[allow(dead_code)]
     fn call_browser_api(
         &mut self,
         func: &RuntimeValue,
