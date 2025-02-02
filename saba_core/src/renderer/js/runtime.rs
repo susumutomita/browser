@@ -256,6 +256,53 @@ impl JsRuntime {
             Node::StringLiteral(value) => Some(RuntimeValue::StringLiteral(value.to_string())),
             Node::NumericLiteral(value) => Some(RuntimeValue::Number(*value)),
 
+            Node::CallExpression { callee, arguments } => {
+                // 新しいスコープを作成する
+                let new_env = Rc::new(RefCell::new(Environment::new(Some(env))));
+
+                let callee_value = match self.eval(callee, new_env.clone()) {
+                    Some(value) => value,
+                    None => return None,
+                };
+
+                // ブラウザAPIの呼び出しを試みる
+                let api_result = self.call_browser_api(&callee_value, arguments, new_env.clone());
+                if api_result.0 {
+                    // もしブラウザAPIを呼び出していたら、ユーザーが定義した関数は実行しない
+                    return api_result.1;
+                }
+
+                // 既に定義されている関数を探す
+                let function = {
+                    let mut f: Option<Function> = None;
+
+                    for func in &self.functions {
+                        if callee_value == RuntimeValue::StringLiteral(func.id.to_string()) {
+                            f = Some(func.clone());
+                        }
+                    }
+
+                    match f {
+                        Some(f) => f,
+                        None => panic!("function {:?} doesn't exist", callee),
+                    }
+                };
+
+                // 関数呼び出し時に渡される引数を新しく作成したスコープのローカル変数として割り当てる
+                assert!(arguments.len() == function.params.len());
+                for (i, item) in arguments.iter().enumerate() {
+                    if let Some(RuntimeValue::StringLiteral(name)) =
+                        self.eval(&function.params[i], new_env.clone())
+                    {
+                        new_env
+                            .borrow_mut()
+                            .add_variable(name, self.eval(item, new_env.clone()));
+                    }
+                }
+
+                // 関数を新しいスコープと共に呼ぶ
+                self.eval(&function.body.clone(), new_env.clone())
+            }
             // 上記で扱っていないバリアントをまとめて無視するならこう書く：
             _ => None,
         }
