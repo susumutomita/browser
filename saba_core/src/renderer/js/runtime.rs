@@ -260,10 +260,7 @@ impl JsRuntime {
                 // 新しいスコープを作成する
                 let new_env = Rc::new(RefCell::new(Environment::new(Some(env))));
 
-                let callee_value = match self.eval(callee, new_env.clone()) {
-                    Some(value) => value,
-                    None => return None,
-                };
+                let callee_value = self.eval(callee, new_env.clone())?;
 
                 // ブラウザAPIの呼び出しを試みる
                 let api_result = self.call_browser_api(&callee_value, arguments, new_env.clone());
