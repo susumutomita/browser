@@ -210,7 +210,7 @@ impl JsRuntime {
                     None
                 }
             }
-
+            #[allow(clippy::question_mark)]
             Node::AssignmentExpression {
                 operator,
                 left,
@@ -225,6 +225,27 @@ impl JsRuntime {
                         let new_value = self.eval(right, env.clone());
                         env.borrow_mut().update_variable(id.to_string(), new_value);
                         return None;
+                    }
+                }
+
+                // もし左辺の値がDOMツリーのノードを表すHtmlElementならば、DOMツリーを更新する
+                if let Some(RuntimeValue::HtmlElement { object, property }) =
+                    self.eval(left, env.clone())
+                {
+                    let right_value = match self.eval(right, env.clone()) {
+                        Some(value) => value,
+                        None => return None,
+                    };
+
+                    if let Some(p) = property {
+                        // target.textContent = "foobar"; のようにノードのテキストを変更する
+                        if p == "textContent" {
+                            object
+                                .borrow_mut()
+                                .set_first_child(Some(Rc::new(RefCell::new(DomNode::new(
+                                    DomNodeKind::Text(right_value.to_string()),
+                                )))));
+                        }
                     }
                 }
                 None
